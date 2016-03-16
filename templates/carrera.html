@@ -1,0 +1,60 @@
+<div ng-controller="carreraCtlr">
+    <h3 class="center">{{titulo}}</h3>
+    <div class="row">
+        <div class="col s6 offset-s3" ng-hide="mostrarTabla">
+            <form ng-submit="confirmar(form)">
+                <label for="descripcion">Descripción</label>
+                <input placeholder="Ingrese una Descripción" id="descripcion" type="text" required ng-model="form.Descripcion"/>
+                <label for="observacion">Observación (Opcional)</label>
+                <textarea id="observacion" type="text" ng-model="form.Observacion"></textarea>
+
+                <br>
+                <button type="submit" class="btn">
+                    {{guardar==true ? 'Guardar' : 'Actualizar'}}
+                    <i class="material-icons right">{{guardar==true ? 'send' : 'done'}}</i>
+                </button>
+            </form>
+        </div>
+        <div class="col s12" ng-show="mostrarTabla" >
+
+            <div class="input-field">
+                <i class="material-icons prefix">search</i>
+                <input id="buscar" type="text"  ng-model="bs"/>
+                <label for="buscar">Ingrese un criterio de Busqueda</label>
+            </div>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Descipción</th>
+                        <th>Observación</th>
+                        <th>Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="x in resultados | filter:bs | orderBy:'Id':true">
+                        <td>{{ x.Id }}</td>
+                        <td>{{ x.Descripcion }}</td>
+                        <td>{{ x.Observacion }}</td>
+                        <td>
+                            <button class="btn-floating" ng-click = "selecionarObjeto(x.Id)">
+                                <i class="material-icons">edit</i>
+                            </button>
+                            <button class="btn-floating red" confirmed-click="eliminar({{ x.Id }})"
+                                    ng-confirm-click="Esta seguro que desea eliminar la carrera {{ x.Descripcion }}">
+                                <i class="material-icons">delete</i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="btn-agregar-{{mostrarTabla}}">
+            <button  ng-click = "cambiarVisibilidad()" class="btn-floating btn-large {{(mostrarTabla) ? '' : 'red darken-4'}}" >
+                <i class="material-icons">add</i>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,81 @@
+<div ng-controller="materiaCtlr">
+    <h3 class="center">{{titulo}}</h3>
+    <div class="row">
+        <div class="col s6 offset-s3" ng-hide="mostrarTabla">
+            <p class="red">{{error}}</p>
+            <form ng-submit="confirmar(form)">
+                <label for="carrera">Carreras{{form.CarId}}</label>
+                <div class="input-field" >
+                    <select id="carrera" ng-model="form.CarId"
+                            ng-options="c.Id as c.Descripcion for c in carreras track by c.Id">
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                </div>
+
+
+                <label for="descripcion">Descripción</label>
+                <input placeholder="Ingrese una Descripción" id="descripcion" type="text"
+                       required ng-model="form.Descripcion"/>
+                <label for="observacion">Observación (Opcional)</label>
+                <textarea id="observacion" type="text" ng-model="form.Observacion"></textarea>
+                <br>
+                <button type="submit" class="btn">
+                    {{guardar==true ? 'Guardar' : 'Actualizar'}}
+                    <i class="material-icons right">{{guardar==true ? 'send' : 'done'}}</i>
+                </button>
+            </form>
+        </div>
+        <div class="col s12" ng-show="mostrarTabla" >
+            <div class="row">
+                <div class="input-field col s8">
+                    <i class="material-icons prefix">search</i>
+                    <input id="buscar" type="text"  ng-model="bs.texto"/>
+                    <label for="buscar">Ingrese un criterio de Busqueda</label>
+                </div>
+                <div class="input-field col s4" >
+                    <select id="carreraFilter" ng-model="bs.carrera"
+                            ng-options="c.Id as c.Descripcion for c in carreras track by c.Id" display-select>
+                        <option value="">Todas las Carreras</option>
+                    </select>
+                </div>
+            </div>
+            <table class="striped">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Descipción</th>
+                    <th>Carrera</th>
+                    <th>Observación</th>
+                    <th>Opciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="x in resultados | filter:buscar | orderBy:'Id':true">
+                    <td>{{ x.Id }}</td>
+                    <td>{{ x.Descripcion }}</td>
+                    <td>{{ x['Carrera.Descripcion'] }}</td>
+                    <td>{{ x.Observacion }}</td>
+                    <td>
+                        <button class="btn-floating" ng-click = "selecionarObjeto(x.Id)">
+                            <i class="material-icons">edit</i>
+                        </button>
+                        <button class="btn-floating red" confirmed-click="eliminar({{ x.Id }})"
+                                ng-confirm-click="Esta seguro que desea eliminar la materia {{ x.Descripcion }}">
+                            <i class="material-icons">delete</i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="btn-agregar-{{mostrarTabla}}">
+            <button  ng-click = "cambiarVisibilidad()"
+                     class="btn-floating btn-large {{(mostrarTabla) ? '' : 'red darken-4'}}" >
+                <i class="material-icons">add</i>
+            </button>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<database name="default" defaultIdMethod="native" defaultPhpNamingMethod="underscore">
+  <table name="alumno" idMethod="native" phpName="Alumno">
+    <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="nombre" phpName="Nombre" type="VARCHAR" size="40" required="true"/>
+    <column name="apellido" phpName="Apellido" type="VARCHAR" size="40" required="true"/>
+    <column name="documento" phpName="Documento" type="VARCHAR" size="15" required="true"/>
+    <column name="senia" phpName="Senia" type="VARCHAR" size="50" required="true"/>
+    <unique name="alumnos_idx">
+      <unique-column name="documento"/>
+    </unique>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="carrera" idMethod="native" phpName="Carrera">
+    <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="descripcion" phpName="Descripcion" type="VARCHAR" size="80" required="true"/>
+    <column name="observacion" phpName="Observacion" type="VARCHAR" size="150"/>
+    <unique name="carreras_idx">
+      <unique-column name="descripcion"/>
+    </unique>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="examen" idMethod="native" phpName="Examen">
+    <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="mat_id" phpName="MatId" type="INTEGER" required="true"/>
+    <column name="per_id" phpName="PerId" type="INTEGER" required="true"/>
+    <column name="fecha" phpName="Fecha" type="DATE" required="true"/>
+    <column name="formativa" phpName="Formativa" type="BOOLEAN" size="1" required="true"/>
+    <foreign-key foreignTable="materia" name="materias_examenes_fk">
+      <reference local="mat_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="periodo" name="periodos_examenes_fk">
+      <reference local="per_id" foreign="id"/>
+    </foreign-key>
+    <index name="materias_examenes_fk">
+      <index-column name="mat_id"/>
+    </index>
+    <index name="periodos_examenes_fk">
+      <index-column name="per_id"/>
+    </index>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="inscripcion" idMethod="native" phpName="Inscripcion">
+    <column name="per_id" phpName="PerId" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="alu_id" phpName="AluId" type="INTEGER" primaryKey="true" required="true"/>
+    <foreign-key foreignTable="alumno" name="alumnos_periodos_detalle_fk">
+      <reference local="alu_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="periodo" name="periodos_periodos_detalle_fk">
+      <reference local="per_id" foreign="id"/>
+    </foreign-key>
+    <index name="alumnos_periodos_detalle_fk">
+      <index-column name="alu_id"/>
+    </index>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="materia" idMethod="native" phpName="Materia">
+    <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="car_id" phpName="CarId" type="INTEGER" required="true"/>
+    <column name="descripcion" phpName="Descripcion" type="VARCHAR" size="80" required="true"/>
+    <column name="observacion" phpName="Observacion" type="VARCHAR" size="150"/>
+    <foreign-key foreignTable="carrera" name="carreras_materias_fk">
+      <reference local="car_id" foreign="id"/>
+    </foreign-key>
+    <index name="carreras_materias_fk">
+      <index-column name="car_id"/>
+    </index>
+    <unique name="materias_idx">
+      <unique-column name="descripcion"/>
+    </unique>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="periodo" idMethod="native" phpName="Periodo">
+    <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="car_id" phpName="CarId" type="INTEGER" required="true"/>
+    <column name="anio" phpName="Anio" type="VARCHAR" size="4" required="true"/>
+    <column name="periodo" phpName="Periodo" type="INTEGER" required="true"/>
+    <foreign-key foreignTable="carrera" name="carreras_periodos_fk">
+      <reference local="car_id" foreign="id"/>
+    </foreign-key>
+    <index name="carreras_periodos_fk">
+      <index-column name="car_id"/>
+    </index>
+    <unique name="periodos_idx">
+      <unique-column name="anio"/>
+      <unique-column name="periodo"/>
+    </unique>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="pregunta" idMethod="native" phpName="Pregunta">
+    <column name="id" phpName="Id" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="exa_id" phpName="ExaId" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="texto" phpName="Texto" type="VARCHAR" size="800" required="true"/>
+    <foreign-key foreignTable="examen" name="examenes_preguntas_fk">
+      <reference local="exa_id" foreign="id"/>
+    </foreign-key>
+    <index name="examenes_preguntas_fk">
+      <index-column name="exa_id"/>
+    </index>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="respuesta" idMethod="native" phpName="Respuesta">
+    <column name="id" phpName="Id" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="pre_id" phpName="PreId" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="exa_id" phpName="ExaId" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="texto" phpName="Texto" type="VARCHAR" size="800" required="true"/>
+    <column name="correcto" phpName="Correcto" type="BOOLEAN" size="1" required="true"/>
+    <foreign-key foreignTable="pregunta" name="preguntas_respuestas_fk">
+      <reference local="exa_id" foreign="exa_id"/>
+      <reference local="pre_id" foreign="id"/>
+    </foreign-key>
+    <index name="preguntas_respuestas_fk">
+      <index-column name="exa_id"/>
+      <index-column name="pre_id"/>
+    </index>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="resultado" idMethod="native" phpName="Resultado">
+    <column name="exa_id" phpName="ExaId" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="alu_id" phpName="AluId" type="INTEGER" primaryKey="true" required="true"/>
+    <foreign-key foreignTable="alumno" name="alumnos_resultados_fk">
+      <reference local="alu_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="examen" name="examenes_resultados_fk">
+      <reference local="exa_id" foreign="id"/>
+    </foreign-key>
+    <index name="alumnos_resultados_fk">
+      <index-column name="alu_id"/>
+    </index>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="resultado_detalle" idMethod="native" phpName="ResultadoDetalle">
+    <column name="alu_id" phpName="AluId" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="pre_id" phpName="PreId" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="exa_id" phpName="ExaId" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="seleccion" phpName="Seleccion" type="INTEGER" required="true"/>
+    <column name="correcto" phpName="Correcto" type="BOOLEAN" size="1" required="true"/>
+    <foreign-key foreignTable="pregunta" name="preguntas_respuestas_fk1">
+      <reference local="exa_id" foreign="exa_id"/>
+      <reference local="pre_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="resultado" name="resultados_respuestas_fk">
+      <reference local="exa_id" foreign="exa_id"/>
+      <reference local="alu_id" foreign="alu_id"/>
+    </foreign-key>
+    <index name="preguntas_respuestas_fk1">
+      <index-column name="exa_id"/>
+      <index-column name="pre_id"/>
+    </index>
+    <index name="resultados_respuestas_fk">
+      <index-column name="exa_id"/>
+      <index-column name="alu_id"/>
+    </index>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="usuario" idMethod="native" phpName="Usuario">
+    <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="nombre" phpName="Nombre" type="VARCHAR" size="80" required="true"/>
+    <column name="alias" phpName="Alias" type="VARCHAR" size="12" required="true"/>
+    <column name="senia" phpName="Senia" type="VARCHAR" size="60" required="true"/>
+    <unique name="usuario_idx">
+      <unique-column name="alias"/>
+    </unique>
+    <unique name="usuario_idx1">
+      <unique-column name="senia"/>
+    </unique>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+</database>
