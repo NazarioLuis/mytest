@@ -1,7 +1,7 @@
-body{
-    border: double 1px grey;
-    padding: 10px;
-    min-height: 500px;
+
+.nav-wrapper{
+    width: 70%;
+    margin: auto;
 }
 
 .btn-agregar-true{
