@@ -5,10 +5,10 @@
             <p class="red-text">{{error}}</p>
             <form ng-submit="confirmar(form)">
                 <label for="descripcion">Descripción</label>
-                <input placeholder="Ingrese una Descripción" id="descripcion" type="text"
+                <input maxlength="80" placeholder="Ingrese una Descripción" id="descripcion" type="text"
                        required ng-model="form.Descripcion"/>
                 <label for="observacion">Observación (Opcional)</label>
-                <textarea id="observacion" type="text" ng-model="form.Observacion"></textarea>
+                <textarea maxlength="150" id="observacion" type="text" ng-model="form.Observacion"></textarea>
 
                 <br>
                 <button type="submit" class="btn">

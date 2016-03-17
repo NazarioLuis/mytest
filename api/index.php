@@ -11,6 +11,6 @@ $app = new \Slim\App;
 require '/app/routes/carrera.php';
 require '/app/routes/alumno.php';
 require '/app/routes/materia.php';
-
+require '/app/routes/periodo.php';
 
 $app->run();

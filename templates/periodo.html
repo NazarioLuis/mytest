@@ -1,4 +1,4 @@
-<div ng-controller="materiaCtlr">
+<div ng-controller="periodoCtlr">
     <h3 class="center">{{titulo}}</h3>
     <div class="row">
         <div class="col s6 offset-s3" ng-hide="mostrarTabla">
@@ -12,12 +12,19 @@
                     </select>
                 </div>
 
+                <div class="row">
+                    <div class="col s3">
+                        <label for="anio">Año Lectivo /</label>
+                        <input min="2010" max="2099" placeholder="20xx" id="anio" type="number"
+                               required ng-model="form.Anio"/>
+                    </div>
+                    <div class="col s2">
+                        <label for="periodo">Periodo</label>
+                        <input min="1" max="4" placeholder="x" id="periodo" type="number"
+                               required ng-model="form.Periodo"/>
+                    </div>
+                </div>
 
-                <label for="descripcion">Descripción</label>
-                <input maxlength="80" placeholder="Ingrese una Descripción" id="descripcion" type="text"
-                       required ng-model="form.Descripcion"/>
-                <label for="observacion">Observación (Opcional)</label>
-                <textarea maxlength="150" id="observacion" type="text" ng-model="form.Observacion"></textarea>
                 <br>
                 <button type="submit" class="btn">
                     {{guardar==true ? 'Guardar' : 'Actualizar'}}
@@ -43,18 +50,16 @@
                 <thead>
                 <tr>
                     <th>Id</th>
-                    <th>Descipción</th>
+                    <th>Periodo Lectivo</th>
                     <th>Carrera</th>
-                    <th>Observación</th>
                     <th>Opciones</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr ng-repeat="x in resultados | filter:buscar | orderBy:'Id':true">
                     <td>{{ x.Id }}</td>
-                    <td>{{ x.Descripcion }}</td>
+                    <td>{{ x.Anio+"/0"+x.Periodo }}</td>
                     <td>{{ x['Carrera.Descripcion'] }}</td>
-                    <td>{{ x.Observacion }}</td>
                     <td>
                         <button class="btn-floating light-green" ng-click = "selecionarObjeto(x.Id)">
                             <i class="material-icons">edit</i>
