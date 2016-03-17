@@ -1,18 +1,6 @@
 
 var app = angular.module('myApp',[]);
 
-app.filter('getById', function() {
-    return function(input, id) {
-        var i=0, len=input.length;
-        for (; i<len; i++) {
-            if (+input[i].Id == +id) {
-                return input[i];
-            }
-        }
-        return null;
-    }
-});
-
 app.directive('ngConfirmClick', [
     function(){
         return {
@@ -60,3 +48,27 @@ app.directive('displaySelect', ['$timeout', function ($timeout) {
         }
     };
 }]);
+
+app.filter('getById', function() {
+    return function(input, id) {
+        var i=0, len=input.length;
+        for (; i<len; i++) {
+            if (+input[i].Id == +id) {
+                return input[i];
+            }
+        }
+        return null;
+    }
+});
+
+app.service('MyService',function(){
+    this.normalize = function(texto){
+        texto = texto.replace(/[áàäâ]/g, "a");
+        texto = texto.replace(/[éèëê]/g, "e");
+        texto = texto.replace(/[íìïî]/g, "i");
+        texto = texto.replace(/[óòôö]/g, "o");
+        texto = texto.replace(/[úùüü]/g, "u");
+        texto = texto.toUpperCase();
+        return texto;
+    }
+});

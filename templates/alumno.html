@@ -2,15 +2,19 @@
     <h3 class="center">{{titulo}}</h3>
     <div class="row">
         <div class="col s6 offset-s3" ng-hide="mostrarTabla">
+            <p class="red-text">{{error}}</p>
             <form ng-submit="confirmar(form)">
                 <label for="nombre">Nombre</label>
-                <input placeholder="Ingrese el Nombre del Alumno" id="nombre" type="text" required ng-model="form.Nombre"/>
+                <input placeholder="Ingrese el Nombre del Alumno" id="nombre" type="text"
+                       required ng-model="form.Nombre"/>
                 <label for="apellido">Apellido</label>
-                <input placeholder="Ingrese el Apellido del Alumno" id="apellido" type="text" required ng-model="form.Apellido"/>
+                <input placeholder="Ingrese el Apellido del Alumno" id="apellido" type="text"
+                       required ng-model="form.Apellido"/>
                 <div class="row">
                     <div class="col s4">
                         <label for="documento">Documento</label>
-                        <input placeholder="Nro de Documento" maxlength="10" id="documento" type="text" required ng-model="form.Documento"/>
+                        <input placeholder="Nro de Documento" maxlength="10" id="documento" type="text"
+                               required ng-model="form.Documento"/>
                     </div>
                 </div>
 
@@ -40,15 +44,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="x in resultados | filter:bs | orderBy:'Id':true">
+                    <tr ng-repeat="x in resultados | filter:buscar | orderBy:'Id':true">
                         <td>{{ x.Id }}</td>
                         <td>{{ x.Nombre }}</td>
                         <td>{{ x.Apellido }}</td>
                         <td>{{ x.Documento }}</td>
                         <td>{{ x.Senia }}</td>
                         <td>
-                            <button class="btn-floating" ng-click = "selecionarObjeto(x.Id)"><i class="material-icons">edit</i></button>
-                            <button class="btn-floating red" confirmed-click="eliminar({{ x.Id }})" ng-confirm-click="Esta seguro que desea eliminar el alumno {{ x.Nombre +' '+ x.Apellido}}">
+                            <button class="btn-floating light-green" ng-click = "selecionarObjeto(x.Id)">
+                                <i class="material-icons">edit</i>
+                            </button>
+                            <button class="btn-floating red" confirmed-click="eliminar({{ x.Id }})"
+                                    ng-confirm-click="Esta seguro que desea eliminar el alumno {{ x.Nombre +' '+ x.Apellido}}">
                                 <i class="material-icons">delete</i>
                             </button>
                         </td>
@@ -59,7 +66,8 @@
         </div>
 
         <div class="btn-agregar-{{mostrarTabla}}">
-            <button  ng-click = "cambiarVisibilidad()" class="btn-floating btn-large {{(mostrarTabla) ? '' : 'red darken-4'}}" >
+            <button  ng-click = "cambiarVisibilidad()"
+                     class="btn-floating btn-large {{(mostrarTabla) ? '' : 'red darken-4'}}" >
                 <i class="material-icons">add</i>
             </button>
         </div>

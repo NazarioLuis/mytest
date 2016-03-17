@@ -2,9 +2,11 @@
     <h3 class="center">{{titulo}}</h3>
     <div class="row">
         <div class="col s6 offset-s3" ng-hide="mostrarTabla">
+            <p class="red-text">{{error}}</p>
             <form ng-submit="confirmar(form)">
                 <label for="descripcion">Descripción</label>
-                <input placeholder="Ingrese una Descripción" id="descripcion" type="text" required ng-model="form.Descripcion"/>
+                <input placeholder="Ingrese una Descripción" id="descripcion" type="text"
+                       required ng-model="form.Descripcion"/>
                 <label for="observacion">Observación (Opcional)</label>
                 <textarea id="observacion" type="text" ng-model="form.Observacion"></textarea>
 
@@ -32,12 +34,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="x in resultados | filter:bs | orderBy:'Id':true">
+                    <tr ng-repeat="x in resultados | filter:buscar | orderBy:'Id':true">
                         <td>{{ x.Id }}</td>
                         <td>{{ x.Descripcion }}</td>
                         <td>{{ x.Observacion }}</td>
                         <td>
-                            <button class="btn-floating" ng-click = "selecionarObjeto(x.Id)">
+                            <button class="btn-floating light-green" ng-click = "selecionarObjeto(x.Id)">
                                 <i class="material-icons">edit</i>
                             </button>
                             <button class="btn-floating red" confirmed-click="eliminar({{ x.Id }})"

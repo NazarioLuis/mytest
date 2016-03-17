@@ -1,5 +1,5 @@
 //Controlador del template de registro de Materias
-app.controller('materiaCtlr', function($scope,$filter, $http) {
+app.controller('materiaCtlr', function(MyService,$scope,$filter, $http) {
     $scope.titulo = "Registro de Asignaturas";
     $scope.resultados = [];
     $scope.carreras = [];
@@ -26,15 +26,13 @@ app.controller('materiaCtlr', function($scope,$filter, $http) {
     });
 
     $scope.confirmar = function(datos){
-        if($scope.form.CarId !== ''){
+        if(validar(datos)){
             $http.post('api/materias',datos)
                 .success(function(data){
                     console.log(data);
                     $scope.resultados = data.Materias;
                     $scope.cambiarVisibilidad();
                 });
-        }else {
-           $scope.error = "Debe seleccionar una carrera";
         }
     };
 
@@ -67,6 +65,7 @@ app.controller('materiaCtlr', function($scope,$filter, $http) {
     selectChangeListener = function(){
         $("#carrera").on('change', function() {
             $scope.form.CarId = $("#carrera").val();
+            $scope.$apply();
         });
         $("#carreraFilter").on('change', function() {
             $scope.bs.carrera = $("#carreraFilter").val();
@@ -81,9 +80,32 @@ app.controller('materiaCtlr', function($scope,$filter, $http) {
     }
 
     $scope.buscar = function (row) {
-
-        return ((row.Descripcion.indexOf($scope.bs.texto) !== -1 || row.Id == $scope.bs.texto)
-            && ($scope.bs.carrera == '' || row.CarId == $scope.bs.carrera));
+        return (MyService.normalize(row.Descripcion).indexOf(MyService.normalize($scope.bs.texto)) >= 0
+            || row.Id == $scope.bs.texto)
+            && ($scope.bs.carrera == '' || row.CarId == $scope.bs.carrera);
 
     };
+    validar = function(datos){
+        if (datos.CarId == ''){
+            $scope.error = 'Debes seleccionar una carrera';
+            return false;
+        }
+        if (!validarDescripcionYCarrera(datos)){
+            $scope.error = 'Ya extiste la asignatura '+datos.Descripcion+' en la carrera seleccionada';
+            console.log(true);
+            return false;
+        }
+        return true;
+    }
+
+    validarDescripcionYCarrera = function(datos){
+        var i=0, len=$scope.resultados.length;
+        for (; i<len; i++) {
+            if (MyService.normalize($scope.resultados[i].Descripcion) == MyService.normalize(datos.Descripcion)
+                && $scope.resultados[i].CarId == datos.CarId && datos['Id'] !== $scope.resultados[i].Id) {
+                return false;
+            }
+        }
+        return true;
+    }
 });

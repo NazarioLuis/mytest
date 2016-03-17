@@ -2,9 +2,11 @@
  * Created by Nazario Luis on 14/03/2016.
  */
 //Controlador del template de registro de alumnos
-app.controller('alumnoCtlr', function($scope,$filter, $http) {
+app.controller('alumnoCtlr', function(MyService,$scope,$filter, $http) {
     $scope.resultados;
     $scope.mostrarTabla = true;
+    $scope.error = '';
+    $scope.bs = '';
     $scope.guardar = true;
     $scope.titulo = "Registro de Alumnos";
 
@@ -18,13 +20,15 @@ app.controller('alumnoCtlr', function($scope,$filter, $http) {
 
 
     $scope.confirmar = function(datos){
-       $http.post('api/alumnos',datos)
-           .success(function(data){
-               $scope.resultados = data.Alumnos;
-               $scope.cambiarVisibilidad();
-           }).error(function(){
-           console.log('Error de datos');
-       });
+        if(validarDocumento(datos)) {
+            $http.post('api/alumnos', datos)
+                .success(function (data) {
+                    $scope.resultados = data.Alumnos;
+                    $scope.cambiarVisibilidad();
+                }).error(function () {
+                console.log('Error de datos');
+            });
+        }
     };
 
     $scope.eliminar = function($id){
@@ -48,5 +52,23 @@ app.controller('alumnoCtlr', function($scope,$filter, $http) {
             $scope.error = "";
         }
         $scope.mostrarTabla = !$scope.mostrarTabla;
+    }
+
+    $scope.buscar = function (row) {
+        return MyService.normalize(row.Nombre).indexOf(MyService.normalize($scope.bs)) >= 0
+                ||MyService.normalize(row.Apellido).indexOf(MyService.normalize($scope.bs)) >= 0
+                ||row.Documento == $scope.bs
+                || row.Id == $scope.bs;
+    };
+
+    validarDocumento = function(datos){
+        var i=0, len=$scope.resultados.length;
+        for (; i<len; i++) {
+            if ($scope.resultados[i].Documento == datos.Documento && datos['Id'] !== $scope.resultados[i].Id) {
+                $scope.error = 'Ya extiste un alumno con documento '+datos.Documento;
+                return false;
+            }
+        }
+        return true;
     }
 });

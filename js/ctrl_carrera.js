@@ -1,8 +1,10 @@
 //Controlador del template de registro de carreras
-app.controller('carreraCtlr', function($scope,$filter, $http) {
+app.controller('carreraCtlr', function(MyService,$scope,$filter, $http) {
     $scope.resultados = [];
     $scope.mostrarTabla = true;
     $scope.guardar = true;
+    $scope.error = '';
+    $scope.bs = '';
     $scope.titulo = "Registro de Carreras";
 
     $http.get('api/carreras').
@@ -13,11 +15,13 @@ app.controller('carreraCtlr', function($scope,$filter, $http) {
     });
 
     $scope.confirmar = function(datos){
-        $http.post('api/carreras',datos)
-            .success(function(data){
-                $scope.resultados = data.Carreras;
-                $scope.cambiarVisibilidad();
-            });
+        if(validarDescripcion(datos)){
+            $http.post('api/carreras',datos)
+                .success(function(data){
+                    $scope.resultados = data.Carreras;
+                    $scope.cambiarVisibilidad();
+                });
+        }
     };
 
     $scope.eliminar = function($id){
@@ -46,4 +50,19 @@ app.controller('carreraCtlr', function($scope,$filter, $http) {
         $scope.mostrarTabla = !$scope.mostrarTabla;
     }
 
+    $scope.buscar = function (row) {
+        return MyService.normalize(row.Descripcion).indexOf(MyService.normalize($scope.bs)) >= 0 || row.Id == $scope.bs;
+    };
+
+    validarDescripcion = function(datos){
+        var i=0, len=$scope.resultados.length;
+        for (; i<len; i++) {
+            if (MyService.normalize($scope.resultados[i].Descripcion) == MyService.normalize(datos.Descripcion)
+                    && datos['Id'] !== $scope.resultados[i].Id) {
+                $scope.error = 'Ya extiste la carrera '+datos.Descripcion;
+                return false;
+            }
+        }
+        return true;
+    }
 });

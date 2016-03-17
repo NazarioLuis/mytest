@@ -2,9 +2,9 @@
     <h3 class="center">{{titulo}}</h3>
     <div class="row">
         <div class="col s6 offset-s3" ng-hide="mostrarTabla">
-            <p class="red">{{error}}</p>
+            <p class="red-text">{{error}}</p>
             <form ng-submit="confirmar(form)">
-                <label for="carrera">Carreras{{form.CarId}}</label>
+                <label for="carrera">Carreras</label>
                 <div class="input-field" >
                     <select id="carrera" ng-model="form.CarId"
                             ng-options="c.Id as c.Descripcion for c in carreras track by c.Id">
@@ -56,7 +56,7 @@
                     <td>{{ x['Carrera.Descripcion'] }}</td>
                     <td>{{ x.Observacion }}</td>
                     <td>
-                        <button class="btn-floating" ng-click = "selecionarObjeto(x.Id)">
+                        <button class="btn-floating light-green" ng-click = "selecionarObjeto(x.Id)">
                             <i class="material-icons">edit</i>
                         </button>
                         <button class="btn-floating red" confirmed-click="eliminar({{ x.Id }})"
