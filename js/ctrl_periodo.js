@@ -81,7 +81,7 @@ app.controller('periodoCtlr', function(MyService,$scope,$filter, $http) {
     }
 
     $scope.buscar = function (row) {
-        return ((row.Anio+"0/"+row.Periodo).indexOf($scope.bs.texto) >= 0
+        return ((row.Anio+"/0"+row.Periodo).indexOf($scope.bs.texto) >= 0
             || row.Id == $scope.bs.texto)
             && ($scope.bs.carrera == '' || row.CarId == $scope.bs.carrera);
 
