@@ -4,9 +4,9 @@ $serviceContainer->checkVersion('2.0.0-dev');
 $serviceContainer->setAdapterClass('default', 'mysql');
 $manager = new \Propel\Runtime\Connection\ConnectionManagerSingle();
 $manager->setConfiguration(array (
-  'dsn' => 'mysql:host=us-cdbr-iron-east-03.cleardb.net;port=3306;dbname=heroku_c2f186147b118ea',
-  'user' => 'b33f561fc38c99',
-  'password' => '963858d9',
+  'dsn' => 'mysql:host=127.8.0.130;port=3306;dbname=itest',
+  'user' => 'admindWtvvaX',
+  'password' => '7Pf_KTRrKVuD',
   'settings' =>
   array (
     'charset' => 'utf8',
