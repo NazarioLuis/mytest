@@ -1,25 +1,16 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Nazario Luis
- * Date: 10/03/2016
- * Time: 12:01
- */
-
-namespace App\Util;
-
 
 class Pass
 {
     public function encryptIt( $q ) {
         $cryptKey  = 'qJB0rGtIn5UB1xG03efyCp';
-        $qEncoded      = base64_encode( mcrypt_encrypt( MCRYPT_RIJNDAEL_256, md5( $cryptKey ), $q, MCRYPT_MODE_CBC, md5( md5( $cryptKey ) ) ) );
+        $qEncoded  = base64_encode( mcrypt_encrypt( MCRYPT_RIJNDAEL_256, md5( $cryptKey ), $q, MCRYPT_MODE_CBC, md5( md5( $cryptKey ) ) ) );
         return( $qEncoded );
     }
 
     public function decryptIt( $q ) {
         $cryptKey  = 'qJB0rGtIn5UB1xG03efyCp';
-        $qDecoded      = rtrim( mcrypt_decrypt( MCRYPT_RIJNDAEL_256, md5( $cryptKey ), base64_decode( $q ), MCRYPT_MODE_CBC, md5( md5( $cryptKey ) ) ), "\0");
+        $qDecoded  = rtrim( mcrypt_decrypt( MCRYPT_RIJNDAEL_256, md5( $cryptKey ), base64_decode( $q ), MCRYPT_MODE_CBC, md5( md5( $cryptKey ) ) ), "\0");
         return( $qDecoded );
     }
 

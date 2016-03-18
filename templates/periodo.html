@@ -15,12 +15,12 @@
                 <div class="row">
                     <div class="col s3">
                         <label for="anio">Año Lectivo /</label>
-                        <input min="2010" max="2099" placeholder="20xx" id="anio" type="number"
+                        <input pattern="\d*" maxlength="4" placeholder="20xx" id="anio" type="text"
                                required ng-model="form.Anio"/>
                     </div>
                     <div class="col s2">
                         <label for="periodo">Periodo</label>
-                        <input min="1" max="4" placeholder="x" id="periodo" type="number"
+                        <input pattern="\d*" maxlength="1" placeholder="x" id="periodo" type="text"
                                required ng-model="form.Periodo"/>
                     </div>
                 </div>
