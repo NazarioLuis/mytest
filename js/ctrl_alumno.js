@@ -71,4 +71,8 @@ app.controller('alumnoCtlr', function(MyService,$scope,$filter, $http) {
         }
         return true;
     }
+
+    $scope.$on('$destroy', function() {
+        delete window.onbeforeunload;
+    });
 });

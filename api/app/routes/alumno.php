@@ -48,7 +48,7 @@ function cargarAlumno(\Base\Alumno $a, $input){
     $a->setNombre($input->Nombre);
     $a->setApellido($input->Apellido);
     $a->setDocumento($input->Documento);
-    $pass = new App\Util\Pass();
+    $pass = new Pass();
     $a->setSenia($pass->encryptIt($pass->generaPass()));
     return $a;
 }
@@ -56,7 +56,7 @@ function cargarAlumno(\Base\Alumno $a, $input){
 
 
 function desencriptarSenia($lista){
-    $p = new \App\Util\Pass();
+    $p = new Pass();
     foreach($lista as $key => $value)
     {
         $lista[$key]->setSenia($p->decryptIt( $lista[$key]->getSenia()));

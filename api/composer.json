@@ -5,5 +5,10 @@
     },
     "autoload": {
 	    "classmap": ["app/models/"]
-	  }
+	  },
+
+    "config": {
+        "vendor-dir": "lib"
+    }
+
 }
