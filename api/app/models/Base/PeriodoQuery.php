@@ -24,11 +24,15 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildPeriodoQuery orderByCarId($order = Criteria::ASC) Order by the car_id column
  * @method     ChildPeriodoQuery orderByAnio($order = Criteria::ASC) Order by the anio column
  * @method     ChildPeriodoQuery orderByPeriodo($order = Criteria::ASC) Order by the periodo column
+ * @method     ChildPeriodoQuery orderByDesde($order = Criteria::ASC) Order by the desde column
+ * @method     ChildPeriodoQuery orderByHasta($order = Criteria::ASC) Order by the hasta column
  *
  * @method     ChildPeriodoQuery groupById() Group by the id column
  * @method     ChildPeriodoQuery groupByCarId() Group by the car_id column
  * @method     ChildPeriodoQuery groupByAnio() Group by the anio column
  * @method     ChildPeriodoQuery groupByPeriodo() Group by the periodo column
+ * @method     ChildPeriodoQuery groupByDesde() Group by the desde column
+ * @method     ChildPeriodoQuery groupByHasta() Group by the hasta column
  *
  * @method     ChildPeriodoQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildPeriodoQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -76,7 +80,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildPeriodo findOneById(int $id) Return the first ChildPeriodo filtered by the id column
  * @method     ChildPeriodo findOneByCarId(int $car_id) Return the first ChildPeriodo filtered by the car_id column
  * @method     ChildPeriodo findOneByAnio(string $anio) Return the first ChildPeriodo filtered by the anio column
- * @method     ChildPeriodo findOneByPeriodo(int $periodo) Return the first ChildPeriodo filtered by the periodo column *
+ * @method     ChildPeriodo findOneByPeriodo(int $periodo) Return the first ChildPeriodo filtered by the periodo column
+ * @method     ChildPeriodo findOneByDesde(string $desde) Return the first ChildPeriodo filtered by the desde column
+ * @method     ChildPeriodo findOneByHasta(string $hasta) Return the first ChildPeriodo filtered by the hasta column *
 
  * @method     ChildPeriodo requirePk($key, ConnectionInterface $con = null) Return the ChildPeriodo by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildPeriodo requireOne(ConnectionInterface $con = null) Return the first ChildPeriodo matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -85,12 +91,16 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildPeriodo requireOneByCarId(int $car_id) Return the first ChildPeriodo filtered by the car_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildPeriodo requireOneByAnio(string $anio) Return the first ChildPeriodo filtered by the anio column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildPeriodo requireOneByPeriodo(int $periodo) Return the first ChildPeriodo filtered by the periodo column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildPeriodo requireOneByDesde(string $desde) Return the first ChildPeriodo filtered by the desde column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildPeriodo requireOneByHasta(string $hasta) Return the first ChildPeriodo filtered by the hasta column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildPeriodo[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildPeriodo objects based on current ModelCriteria
  * @method     ChildPeriodo[]|ObjectCollection findById(int $id) Return ChildPeriodo objects filtered by the id column
  * @method     ChildPeriodo[]|ObjectCollection findByCarId(int $car_id) Return ChildPeriodo objects filtered by the car_id column
  * @method     ChildPeriodo[]|ObjectCollection findByAnio(string $anio) Return ChildPeriodo objects filtered by the anio column
  * @method     ChildPeriodo[]|ObjectCollection findByPeriodo(int $periodo) Return ChildPeriodo objects filtered by the periodo column
+ * @method     ChildPeriodo[]|ObjectCollection findByDesde(string $desde) Return ChildPeriodo objects filtered by the desde column
+ * @method     ChildPeriodo[]|ObjectCollection findByHasta(string $hasta) Return ChildPeriodo objects filtered by the hasta column
  * @method     ChildPeriodo[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -183,7 +193,7 @@ abstract class PeriodoQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT id, car_id, anio, periodo FROM periodo WHERE id = :p0';
+        $sql = 'SELECT id, car_id, anio, periodo, desde, hasta FROM periodo WHERE id = :p0';
         try {
             $stmt = $con->prepare($sql);            
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -428,6 +438,92 @@ abstract class PeriodoQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the desde column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByDesde('2011-03-14'); // WHERE desde = '2011-03-14'
+     * $query->filterByDesde('now'); // WHERE desde = '2011-03-14'
+     * $query->filterByDesde(array('max' => 'yesterday')); // WHERE desde > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $desde The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildPeriodoQuery The current query, for fluid interface
+     */
+    public function filterByDesde($desde = null, $comparison = null)
+    {
+        if (is_array($desde)) {
+            $useMinMax = false;
+            if (isset($desde['min'])) {
+                $this->addUsingAlias(PeriodoTableMap::COL_DESDE, $desde['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($desde['max'])) {
+                $this->addUsingAlias(PeriodoTableMap::COL_DESDE, $desde['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(PeriodoTableMap::COL_DESDE, $desde, $comparison);
+    }
+
+    /**
+     * Filter the query on the hasta column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByHasta('2011-03-14'); // WHERE hasta = '2011-03-14'
+     * $query->filterByHasta('now'); // WHERE hasta = '2011-03-14'
+     * $query->filterByHasta(array('max' => 'yesterday')); // WHERE hasta > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $hasta The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildPeriodoQuery The current query, for fluid interface
+     */
+    public function filterByHasta($hasta = null, $comparison = null)
+    {
+        if (is_array($hasta)) {
+            $useMinMax = false;
+            if (isset($hasta['min'])) {
+                $this->addUsingAlias(PeriodoTableMap::COL_HASTA, $hasta['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($hasta['max'])) {
+                $this->addUsingAlias(PeriodoTableMap::COL_HASTA, $hasta['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(PeriodoTableMap::COL_HASTA, $hasta, $comparison);
+    }
+
+    /**
      * Filter the query by a related \Carrera object
      *
      * @param \Carrera|ObjectCollection $carrera The related object(s) to use as filter
@@ -648,6 +744,23 @@ abstract class PeriodoQuery extends ModelCriteria
         return $this
             ->joinInscripcion($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'Inscripcion', '\InscripcionQuery');
+    }
+
+    /**
+     * Filter the query by a related Alumno object
+     * using the inscripcion table as cross reference
+     *
+     * @param Alumno $alumno the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildPeriodoQuery The current query, for fluid interface
+     */
+    public function filterByAlumno($alumno, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useInscripcionQuery()
+            ->filterByAlumno($alumno, $comparison)
+            ->endUse();
     }
 
     /**

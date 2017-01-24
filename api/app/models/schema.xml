@@ -46,9 +46,10 @@
       <parameter name="Engine" value="InnoDB"/>
     </vendor>
   </table>
-  <table name="inscripcion" idMethod="native" phpName="Inscripcion">
+  <table name="inscripcion" idMethod="native" phpName="Inscripcion" isCrossRef="true">
     <column name="per_id" phpName="PerId" type="INTEGER" primaryKey="true" required="true"/>
     <column name="alu_id" phpName="AluId" type="INTEGER" primaryKey="true" required="true"/>
+    <column name="orden" phpName="Orden" type="INTEGER" required="true"/>
     <foreign-key foreignTable="alumno" name="alumnos_periodos_detalle_fk">
       <reference local="alu_id" foreign="id"/>
     </foreign-key>
@@ -86,6 +87,8 @@
     <column name="car_id" phpName="CarId" type="INTEGER" required="true"/>
     <column name="anio" phpName="Anio" type="VARCHAR" size="4" required="true"/>
     <column name="periodo" phpName="Periodo" type="INTEGER" required="true"/>
+    <column name="desde" phpName="Desde" type="DATE" required="true"/>
+    <column name="hasta" phpName="Hasta" type="DATE" required="true"/>
     <foreign-key foreignTable="carrera" name="carreras_periodos_fk">
       <reference local="car_id" foreign="id"/>
     </foreign-key>

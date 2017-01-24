@@ -1,0 +1,88 @@
+<div ng-controller="evaluacionCtlr">
+    <div ng-hide="login" class="row">
+        <div class="col s4 offset-s4">
+            <p class="red-text">{{error}}</p>
+            <form ng-submit="confirmar(form)">
+                <label for="carrera">Carreras</label>
+                <div class="input-field" >
+                    <select id="carrera" ng-model="form.CarId"
+                            ng-options="c.Id as c.Descripcion for c in carreras track by c.Id" display-select>
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                </div>
+                <label for="carrera">Asignatura</label>
+                <div class="input-field" >
+                    <select id="materia" ng-model="form.MatId"
+                            ng-options="m.Id as m.Descripcion for m in materias track by m.Id" display-select>
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                </div>
+                <label for="documento">Documento</label>
+                <input placeholder="Nro de Documento" maxlength="15" id="documento" type="text"
+                       required ng-model="form.Documento"/>
+                <label for="pass">Seña</label>
+                <input maxlength="15" id="pass" type="password" required ng-model="form.Pass"/>
+                <br>
+
+                <button type="submit" class="btn">Entrar
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
+        </div>
+    </div>
+    <div ng-hide="!login">
+        <h3 class="center">
+            {{'Prueba '+( examen.Formativa?'Formativa':'Sumativa')+' de '+
+            examen['Materia.Descripcion']}}
+        </h3>
+        <p class="center">
+            {{'Fecha: '+examen.FechaFormato}}<hr>
+            ALUMNO<br>
+            {{'Nombre: '+examen.alu.Nombre}}<br>
+            {{'C.I.: '+examen.alu.Documento}}<br>
+            {{'Total: '+total}}<br>
+            {{'Puntaje: '+puntaje}}<br>
+            {{'Porcentaje: '+porcentaje}}
+        </p>
+
+
+        <h5 class="center">Preguntas</h5>
+
+        <div class="preguntas" ng-repeat="x in preguntas | orderBy:'Id'">
+            <div class="pregunta">
+                <div class="row">
+                    <div style="float: left">
+                        <b>{{x.Id+') '}}</b>
+                    </div>
+                    <div class="col s11">
+                       {{x.Texto}}
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="row respuestas">
+                <div class="col s10 offset-s2">
+                    <div class="row" ng-repeat="r in x.Respuestas">
+                        <input id="iscorrecto{{x.Id+'/'+r.Id}}" type="checkbox" ng-model="r.Correcto"
+                               ng-click="cambiarSeleccion(x.Id, r.Id)" ng-disabled="concluido">
+                        <label for="iscorrecto{{x.Id+'/'+r.Id}}">{{abc[r.Id]+') '+ r.Texto}}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fixed-action-btn horizontal">
+            <button ng-hide="concluido" confirmed-click="guardarResultado()"
+                     ng-confirm-click="Esta seguro que desea finalizar la evaluación"
+                     class="btn-floating btn-large" >
+                <i class="material-icons">send</i>
+            </button>
+            <button ng-show="concluido" onclick="self.close()"
+                     class="btn-floating btn-large red" >
+                <i class="material-icons">close</i>
+            </button>
+        </div>
+    </div>
+</div>

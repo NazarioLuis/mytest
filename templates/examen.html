@@ -1,0 +1,100 @@
+
+<div ng-controller="examenCtlr">
+    <h3 class="center">{{titulo}}</h3>
+    <div class="row">
+        <div class="input-field col s6" >
+            <select id="carrera" ng-model="carrera"
+                    ng-options="c.Id as c.Descripcion for c in carreras track by c.Id" display-select>
+                <option value="">--Seleccionar Carrera--</option>
+            </select>
+        </div>
+        <div class="input-field col s6" >
+            <select id="periodo" ng-model="periodo"
+                    ng-options="p.Id as  p.Anio+'/0'+p.Periodo for p in periodos track by p.Id" display-select>
+                <option value="">--Seleccionar el Periodo Lectivo--</option>
+            </select>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="row" ng-show="mostrarContenido">
+        <div class="col s6 offset-s3" ng-hide="mostrarTabla">
+            <p class="red-text">{{error}}</p>
+            <form ng-submit="confirmar(form)">
+                <label for="carrera">Asignatura</label>
+                <div class="input-field" >
+                    <select id="materia" ng-model="form.CarId"
+                            ng-options="m.Id as m.Descripcion for m in materias track by m.Id">
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                </div>
+                <label for="fecha">Carreras</label>
+                <div class="input-field" >
+                    <input id="fecha" type="date" ng-model="form.Fecha" ng-model-options="{timezone: 'UTC'}" required>
+                </div>
+
+                <p>
+                    <input type="checkbox" id="formativa" ng-model="form.Formativa"/>
+                    <label for="formativa">Prueba Formativa</label>
+                </p>
+                <br>
+                <button type="submit" class="btn">
+                    {{guardar==true ? 'Guardar' : 'Actualizar'}}
+                    <i class="material-icons right">{{guardar==true ? 'send' : 'done'}}</i>
+                </button>
+            </form>
+
+        </div>
+        <div class="col s12" ng-show="mostrarTabla" >
+            <div class="row">
+                <div class="input-field col s6" >
+                    <select id="materiaFilter" ng-model="materia"
+                            ng-options="m.Id as m.Descripcion for m in materias track by m.Id" display-select>
+                        <option value="">Todas las Asignaturas</option>
+                    </select>
+                </div>
+            </div>
+            <table class="striped">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Materia</th>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Opciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="x in resultados | filter:buscar | orderBy:'Id':true ">
+                    <td>{{ x.Id }}</td>
+                    <td>{{ x['Materia.Descripcion'] }}</td>
+                    <td>{{x.FechaFormato}}</td>
+                    <td>{{ x.Formativa ? 'Formativa':'Sumativa'}}</td>
+                    <td>
+                        <button ng-disabled="x.Resultados" class="btn-floating light-blue darken-2" ng-click = "addPreguntas(x)">
+                            <i class="material-icons">note_add</i>
+                        </button>
+                        <button ng-disabled="x.Resultados" class="btn-floating light-green" ng-click = "selecionarObjeto(x.Id)">
+                            <i class="material-icons">edit</i>
+                        </button>
+                        <button ng-disabled="x.Resultados" class="btn-floating red" confirmed-click="eliminar({{ x.Id }})"
+                                ng-confirm-click="Esta seguro que desea eliminar la materia {{ x.Descripcion }}">
+                            <i class="material-icons">delete</i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="fixed-action-btn horizontal btn-agregar-{{mostrarTabla}}">
+            <button  ng-click = "cambiarVisibilidad()"
+                     class="btn-floating btn-large {{(mostrarTabla) ? '' : 'red darken-4'}}" >
+                <i class="material-icons">add</i>
+            </button>
+        </div>
+    </div>
+</div>
+

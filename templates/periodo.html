@@ -25,6 +25,17 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col s6">
+                        <label for="desde">Inicio del Periodo</label>
+                            <input id="desde" type="date" ng-model="form.Desde" ng-model-options="{timezone: 'UTC'}" required>
+                    </div>
+                    <div class="col s6">
+                        <label for="hasta">Fin del Periodo</label>
+                        <input id="hasta" type="date" ng-model="form.Hasta" ng-model-options="{timezone: 'UTC'}" required>
+                    </div>
+                </div>
+
                 <br>
                 <button type="submit" class="btn">
                     {{guardar==true ? 'Guardar' : 'Actualizar'}}
@@ -52,6 +63,8 @@
                     <th>Id</th>
                     <th>Periodo Lectivo</th>
                     <th>Carrera</th>
+                    <th>Desde</th>
+                    <th>Hasta</th>
                     <th>Opciones</th>
                 </tr>
                 </thead>
@@ -60,6 +73,8 @@
                     <td>{{ x.Id }}</td>
                     <td>{{ x.Anio+"/0"+x.Periodo }}</td>
                     <td>{{ x['Carrera.Descripcion'] }}</td>
+                    <td>{{ x['DesdeFormato'] }}</td>
+                    <td>{{ x['HastaFormato'] }}</td>
                     <td>
                         <button class="btn-floating light-green" ng-click = "selecionarObjeto(x.Id)">
                             <i class="material-icons">edit</i>
@@ -75,7 +90,7 @@
 
         </div>
 
-        <div class="btn-agregar-{{mostrarTabla}}">
+        <div class="fixed-action-btn horizontal btn-agregar-{{mostrarTabla}}">
             <button  ng-click = "cambiarVisibilidad()"
                      class="btn-floating btn-large {{(mostrarTabla) ? '' : 'red darken-4'}}" >
                 <i class="material-icons">add</i>

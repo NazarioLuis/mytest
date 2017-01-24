@@ -12,6 +12,7 @@ app.controller('alumnoCtlr', function(MyService,$scope,$filter, $http) {
 
     $http.get('api/alumnos').
     success(function(data) {
+        console.log(data);
         $scope.resultados = data.Alumnos;
     }).error(function(){
         console.log('Error de datos');
@@ -35,7 +36,9 @@ app.controller('alumnoCtlr', function(MyService,$scope,$filter, $http) {
         $http.delete('api/alumnos/'+$id)
             .success(function(data){
                 $scope.resultados = data.Alumnos;
-            }).error();
+            }).error(function(){
+                MyService.error("No se puede elminar, pues esta en uso!");
+            });
     };
 
     $scope.selecionarObjeto = function(id){

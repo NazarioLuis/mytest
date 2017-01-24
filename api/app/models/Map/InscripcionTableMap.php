@@ -59,7 +59,7 @@ class InscripcionTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 2;
+    const NUM_COLUMNS = 3;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class InscripcionTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 2;
+    const NUM_HYDRATE_COLUMNS = 3;
 
     /**
      * the column name for the per_id field
@@ -80,6 +80,11 @@ class InscripcionTableMap extends TableMap
      * the column name for the alu_id field
      */
     const COL_ALU_ID = 'inscripcion.alu_id';
+
+    /**
+     * the column name for the orden field
+     */
+    const COL_ORDEN = 'inscripcion.orden';
 
     /**
      * The default string format for model objects of the related table
@@ -93,11 +98,11 @@ class InscripcionTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('PerId', 'AluId', ),
-        self::TYPE_CAMELNAME     => array('perId', 'aluId', ),
-        self::TYPE_COLNAME       => array(InscripcionTableMap::COL_PER_ID, InscripcionTableMap::COL_ALU_ID, ),
-        self::TYPE_FIELDNAME     => array('per_id', 'alu_id', ),
-        self::TYPE_NUM           => array(0, 1, )
+        self::TYPE_PHPNAME       => array('PerId', 'AluId', 'Orden', ),
+        self::TYPE_CAMELNAME     => array('perId', 'aluId', 'orden', ),
+        self::TYPE_COLNAME       => array(InscripcionTableMap::COL_PER_ID, InscripcionTableMap::COL_ALU_ID, InscripcionTableMap::COL_ORDEN, ),
+        self::TYPE_FIELDNAME     => array('per_id', 'alu_id', 'orden', ),
+        self::TYPE_NUM           => array(0, 1, 2, )
     );
 
     /**
@@ -107,11 +112,11 @@ class InscripcionTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('PerId' => 0, 'AluId' => 1, ),
-        self::TYPE_CAMELNAME     => array('perId' => 0, 'aluId' => 1, ),
-        self::TYPE_COLNAME       => array(InscripcionTableMap::COL_PER_ID => 0, InscripcionTableMap::COL_ALU_ID => 1, ),
-        self::TYPE_FIELDNAME     => array('per_id' => 0, 'alu_id' => 1, ),
-        self::TYPE_NUM           => array(0, 1, )
+        self::TYPE_PHPNAME       => array('PerId' => 0, 'AluId' => 1, 'Orden' => 2, ),
+        self::TYPE_CAMELNAME     => array('perId' => 0, 'aluId' => 1, 'orden' => 2, ),
+        self::TYPE_COLNAME       => array(InscripcionTableMap::COL_PER_ID => 0, InscripcionTableMap::COL_ALU_ID => 1, InscripcionTableMap::COL_ORDEN => 2, ),
+        self::TYPE_FIELDNAME     => array('per_id' => 0, 'alu_id' => 1, 'orden' => 2, ),
+        self::TYPE_NUM           => array(0, 1, 2, )
     );
 
     /**
@@ -130,9 +135,11 @@ class InscripcionTableMap extends TableMap
         $this->setClassName('\\Inscripcion');
         $this->setPackage('');
         $this->setUseIdGenerator(false);
+        $this->setIsCrossRef(true);
         // columns
         $this->addForeignPrimaryKey('per_id', 'PerId', 'INTEGER' , 'periodo', 'id', true, null, null);
         $this->addForeignPrimaryKey('alu_id', 'AluId', 'INTEGER' , 'alumno', 'id', true, null, null);
+        $this->addColumn('orden', 'Orden', 'INTEGER', true, null, null);
     } // initialize()
 
     /**
@@ -361,9 +368,11 @@ class InscripcionTableMap extends TableMap
         if (null === $alias) {
             $criteria->addSelectColumn(InscripcionTableMap::COL_PER_ID);
             $criteria->addSelectColumn(InscripcionTableMap::COL_ALU_ID);
+            $criteria->addSelectColumn(InscripcionTableMap::COL_ORDEN);
         } else {
             $criteria->addSelectColumn($alias . '.per_id');
             $criteria->addSelectColumn($alias . '.alu_id');
+            $criteria->addSelectColumn($alias . '.orden');
         }
     }
 

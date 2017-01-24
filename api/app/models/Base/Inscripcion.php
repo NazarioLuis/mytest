@@ -78,6 +78,13 @@ abstract class Inscripcion implements ActiveRecordInterface
     protected $alu_id;
 
     /**
+     * The value for the orden field.
+     * 
+     * @var        int
+     */
+    protected $orden;
+
+    /**
      * @var        ChildAlumno
      */
     protected $aAlumno;
@@ -341,6 +348,16 @@ abstract class Inscripcion implements ActiveRecordInterface
     }
 
     /**
+     * Get the [orden] column value.
+     * 
+     * @return int
+     */
+    public function getOrden()
+    {
+        return $this->orden;
+    }
+
+    /**
      * Set the value of [per_id] column.
      * 
      * @param int $v new value
@@ -389,6 +406,26 @@ abstract class Inscripcion implements ActiveRecordInterface
     } // setAluId()
 
     /**
+     * Set the value of [orden] column.
+     * 
+     * @param int $v new value
+     * @return $this|\Inscripcion The current object (for fluent API support)
+     */
+    public function setOrden($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->orden !== $v) {
+            $this->orden = $v;
+            $this->modifiedColumns[InscripcionTableMap::COL_ORDEN] = true;
+        }
+
+        return $this;
+    } // setOrden()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -429,6 +466,9 @@ abstract class Inscripcion implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : InscripcionTableMap::translateFieldName('AluId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->alu_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : InscripcionTableMap::translateFieldName('Orden', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->orden = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -437,7 +477,7 @@ abstract class Inscripcion implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 2; // 2 = InscripcionTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 3; // 3 = InscripcionTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\Inscripcion'), 0, $e);
@@ -663,6 +703,9 @@ abstract class Inscripcion implements ActiveRecordInterface
         if ($this->isColumnModified(InscripcionTableMap::COL_ALU_ID)) {
             $modifiedColumns[':p' . $index++]  = 'alu_id';
         }
+        if ($this->isColumnModified(InscripcionTableMap::COL_ORDEN)) {
+            $modifiedColumns[':p' . $index++]  = 'orden';
+        }
 
         $sql = sprintf(
             'INSERT INTO inscripcion (%s) VALUES (%s)',
@@ -679,6 +722,9 @@ abstract class Inscripcion implements ActiveRecordInterface
                         break;
                     case 'alu_id':                        
                         $stmt->bindValue($identifier, $this->alu_id, PDO::PARAM_INT);
+                        break;
+                    case 'orden':                        
+                        $stmt->bindValue($identifier, $this->orden, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -741,6 +787,9 @@ abstract class Inscripcion implements ActiveRecordInterface
             case 1:
                 return $this->getAluId();
                 break;
+            case 2:
+                return $this->getOrden();
+                break;
             default:
                 return null;
                 break;
@@ -773,6 +822,7 @@ abstract class Inscripcion implements ActiveRecordInterface
         $result = array(
             $keys[0] => $this->getPerId(),
             $keys[1] => $this->getAluId(),
+            $keys[2] => $this->getOrden(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -850,6 +900,9 @@ abstract class Inscripcion implements ActiveRecordInterface
             case 1:
                 $this->setAluId($value);
                 break;
+            case 2:
+                $this->setOrden($value);
+                break;
         } // switch()
 
         return $this;
@@ -881,6 +934,9 @@ abstract class Inscripcion implements ActiveRecordInterface
         }
         if (array_key_exists($keys[1], $arr)) {
             $this->setAluId($arr[$keys[1]]);
+        }
+        if (array_key_exists($keys[2], $arr)) {
+            $this->setOrden($arr[$keys[2]]);
         }
     }
 
@@ -928,6 +984,9 @@ abstract class Inscripcion implements ActiveRecordInterface
         }
         if ($this->isColumnModified(InscripcionTableMap::COL_ALU_ID)) {
             $criteria->add(InscripcionTableMap::COL_ALU_ID, $this->alu_id);
+        }
+        if ($this->isColumnModified(InscripcionTableMap::COL_ORDEN)) {
+            $criteria->add(InscripcionTableMap::COL_ORDEN, $this->orden);
         }
 
         return $criteria;
@@ -1039,6 +1098,7 @@ abstract class Inscripcion implements ActiveRecordInterface
     {
         $copyObj->setPerId($this->getPerId());
         $copyObj->setAluId($this->getAluId());
+        $copyObj->setOrden($this->getOrden());
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -1183,6 +1243,7 @@ abstract class Inscripcion implements ActiveRecordInterface
         }
         $this->per_id = null;
         $this->alu_id = null;
+        $this->orden = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();

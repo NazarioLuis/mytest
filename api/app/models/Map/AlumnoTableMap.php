@@ -172,6 +172,7 @@ class AlumnoTableMap extends TableMap
     1 => ':id',
   ),
 ), null, null, 'Resultados', false);
+        $this->addRelation('Periodo', '\\Periodo', RelationMap::MANY_TO_MANY, array(), null, null, 'Periodos');
     } // buildRelations()
 
     /**

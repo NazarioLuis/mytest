@@ -1,0 +1,40 @@
+
+<div ng-controller="informeExamenCtlr">
+    <h4 class="center">
+        {{'Prueba '+( par['examen'].Formativa?'Formativa':'Sumativa')+' de '+
+        par['examen']['Materia.Descripcion']}}
+    </h4>
+    <p class="center">
+        {{par['periodo']['Carrera.Descripcion']+', ' +
+        'periodo lectivo '+par['periodo'].Anio+"/0"+par['periodo'].Periodo}} <br>
+        {{'Fecha: '+par['examen'].FechaFormato}}
+    </p>
+    <br>
+
+    <div class="row">
+        <div class="col s12" >
+            <table class="striped">
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Documento</th>
+                    <th>Total</th>
+                    <th>Correctos</th>
+                    <th>Porcentaje</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="x in resultados | orderBy:['Nombre'] ">
+                    <td>{{ x['Alumno.Apellido'] }} {{ x['Alumno.Nombre'] }}</td>
+                    <td>{{ x['Alumno.Documento'] }}</td>
+                    <td>{{ x['Total'] }}</td>
+                    <td>{{ x['Correcto'] }}</td>
+                    <td>{{ x['Porcentaje']+"%" }}</td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+

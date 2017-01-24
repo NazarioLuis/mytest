@@ -7,27 +7,27 @@ $app->any('/carreras[/{id}]',
     //Se coprueba que parametro id no exista
     if (!isset($args['id'])) {
     	if ($request->isGet()) {
-            retornarCarreraJSON($response);
+            retornarCarrerasJSON($response);
 	    }elseif ($request->isPost()) {
             $input = json_decode($request->getBody());
             $carrera = new Carrera();
             if(isset($input->Id))
                 $carrera= \Base\CarreraQuery::create()->findPk($input->Id);
             cargarCarrera($carrera, $input)->save();
-            retornarCarreraJSON($response);
+            retornarCarrerasJSON($response);
         }
     }else{
         if ($request->isGet()) {
             retornarCarreraComoJSON($response, $args['id']);
         }elseif ($request->isDelete()) {
             \Base\CarreraQuery::create()->findPk($args['id'])->delete();
-            retornarCarreraJSON($response);
+            retornarCarrerasJSON($response);
         }
     }
 });
 
 //Retorna un json que contiene una lista obtenida de la bd
-function retornarCarreraJSON($response){
+function retornarCarrerasJSON($response){
     $response->withHeader("Content-type", "application/json");
     $response->withStatus(200);
     $response->getBody()->write(\Base\CarreraQuery::create()->find()->toJSON());

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+
+    <title>My Test System</title>
+    <link rel="stylesheet" href="font/material-design-icons/material-icons.css">
+    <link rel="stylesheet" href="css/lib/materialize.min.css">
+    <link rel="stylesheet" href="css/lib/jquery-ui.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/lib/angular.min.js"></script>
+    <script src="js/lib/angular-route.min.js"></script>
+    <script src="js/lib/jquery-2.2.1.min.js"></script>
+    <script src="js/lib/jquery-ui.min.js"></script>
+    <script src="js/lib/materialize.js"></script>
+
+    <link rel="icon" type="image/png" href="/images/mifavicon.png" />
+</head>
+<body ng-app="myApp">
+
+<!-- Dropdown General -->
+<ul id="dropdownGeneral" class="dropdown-content">
+    <li><a ng-click="$root.template='alumno'">Alumno</a></li>
+    <li><a ng-click="$root.template='carrera'">Carrera</a></li>
+    <li><a ng-click="$root.template='periodo'">Periodo Lectivo</a></li>
+    <li><a ng-click="$root.template='materia'">Asignatura</a></li>
+</ul>
+<!-- Dropdown Procesos -->
+<ul id="dropdownProceso" class="dropdown-content">
+    <li><a ng-click="$root.template='inscripcion'">Inscribir Alumnos</a></li>
+    <li><a ng-click="$root.template='examen'">Registro de Exámenes</a></li>
+</ul>
+
+<!-- Dropdown Reportes -->
+<ul id="dropdownReportes" class="dropdown-content">
+    <li><a ng-click="$root.template='informe_examen'">Informe de Resultados</a></li>
+</ul>
+
+<nav ng-show="primario" class="red accent-3">
+    <div  class="nav-wrapper">
+        <a href="#" ng-click="template=null" class="brand-logo">i-Test</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a class="dropdown-button" href="#!" data-activates="dropdownGeneral">General
+                <i class="material-icons right">arrow_drop_down</i></a></li>
+            <li><a class="dropdown-button" href="#!" data-activates="dropdownProceso">Procesos
+                <i class="material-icons right">arrow_drop_down</i></a></li>
+            <li><a class="dropdown-button" href="#!" data-activates="dropdownReportes">Reportes
+                <i class="material-icons right">arrow_drop_down</i></a></li>
+        </ul>
+    </div>
+</nav>
+
+<!--Se agrega un template con angularjs-->
+<div ng-show="primario" class="container" ng-include="'templates/'+(template==null?'bienvenido':template)+'.html'"></div>
+
+<div ng-show="!primario" class="container" ng-include="template_carga==null?'':'templates/'+template_carga+'.html'"></div>
+
+    <script src="js/app.js"></script>
+    <script src="js/ctrl_alumno.js"></script>
+    <script src="js/ctrl_materia.js"></script>
+    <script src="js/ctrl_carrera.js"></script>
+    <script src="js/ctrl_periodo.js"></script>
+    <script src="js/ctrl_inscripcion.js"></script>
+    <script src="js/ctrl_examen.js"></script>
+    <script src="js/ctrl_reporte_examen.js"></script>
+    <script src="js/ctrl_pregunta.js"></script>
+    <script>
+        window.onbeforeunload = function() {
+            return "Esta seguro de que desea abandonar esta pagina!";
+        }
+    </script>
+
+</body>
+</html>

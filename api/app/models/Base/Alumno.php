@@ -6,6 +6,8 @@ use \Alumno as ChildAlumno;
 use \AlumnoQuery as ChildAlumnoQuery;
 use \Inscripcion as ChildInscripcion;
 use \InscripcionQuery as ChildInscripcionQuery;
+use \Periodo as ChildPeriodo;
+use \PeriodoQuery as ChildPeriodoQuery;
 use \Resultado as ChildResultado;
 use \ResultadoQuery as ChildResultadoQuery;
 use \Exception;
@@ -115,12 +117,28 @@ abstract class Alumno implements ActiveRecordInterface
     protected $collResultadosPartial;
 
     /**
+     * @var        ObjectCollection|ChildPeriodo[] Cross Collection to store aggregation of ChildPeriodo objects.
+     */
+    protected $collPeriodos;
+
+    /**
+     * @var bool
+     */
+    protected $collPeriodosPartial;
+
+    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      *
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildPeriodo[]
+     */
+    protected $periodosScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -632,6 +650,7 @@ abstract class Alumno implements ActiveRecordInterface
 
             $this->collResultados = null;
 
+            $this->collPeriodos = null;
         } // if (deep)
     }
 
@@ -741,6 +760,35 @@ abstract class Alumno implements ActiveRecordInterface
                 }
                 $this->resetModified();
             }
+
+            if ($this->periodosScheduledForDeletion !== null) {
+                if (!$this->periodosScheduledForDeletion->isEmpty()) {
+                    $pks = array();
+                    foreach ($this->periodosScheduledForDeletion as $entry) {
+                        $entryPk = [];
+
+                        $entryPk[1] = $this->getId();
+                        $entryPk[0] = $entry->getId();
+                        $pks[] = $entryPk;
+                    }
+
+                    \InscripcionQuery::create()
+                        ->filterByPrimaryKeys($pks)
+                        ->delete($con);
+
+                    $this->periodosScheduledForDeletion = null;
+                }
+
+            }
+
+            if ($this->collPeriodos) {
+                foreach ($this->collPeriodos as $periodo) {
+                    if (!$periodo->isDeleted() && ($periodo->isNew() || $periodo->isModified())) {
+                        $periodo->save($con);
+                    }
+                }
+            }
+
 
             if ($this->inscripcionsScheduledForDeletion !== null) {
                 if (!$this->inscripcionsScheduledForDeletion->isEmpty()) {
@@ -1802,6 +1850,249 @@ abstract class Alumno implements ActiveRecordInterface
     }
 
     /**
+     * Clears out the collPeriodos collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addPeriodos()
+     */
+    public function clearPeriodos()
+    {
+        $this->collPeriodos = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Initializes the collPeriodos crossRef collection.
+     *
+     * By default this just sets the collPeriodos collection to an empty collection (like clearPeriodos());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @return void
+     */
+    public function initPeriodos()
+    {
+        $collectionClassName = InscripcionTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collPeriodos = new $collectionClassName;
+        $this->collPeriodosPartial = true;
+        $this->collPeriodos->setModel('\Periodo');
+    }
+
+    /**
+     * Checks if the collPeriodos collection is loaded.
+     *
+     * @return bool
+     */
+    public function isPeriodosLoaded()
+    {
+        return null !== $this->collPeriodos;
+    }
+
+    /**
+     * Gets a collection of ChildPeriodo objects related by a many-to-many relationship
+     * to the current object by way of the inscripcion cross-reference table.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildAlumno is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      ConnectionInterface $con Optional connection object
+     *
+     * @return ObjectCollection|ChildPeriodo[] List of ChildPeriodo objects
+     */
+    public function getPeriodos(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collPeriodosPartial && !$this->isNew();
+        if (null === $this->collPeriodos || null !== $criteria || $partial) {
+            if ($this->isNew()) {
+                // return empty collection
+                if (null === $this->collPeriodos) {
+                    $this->initPeriodos();
+                }
+            } else {
+
+                $query = ChildPeriodoQuery::create(null, $criteria)
+                    ->filterByAlumno($this);
+                $collPeriodos = $query->find($con);
+                if (null !== $criteria) {
+                    return $collPeriodos;
+                }
+
+                if ($partial && $this->collPeriodos) {
+                    //make sure that already added objects gets added to the list of the database.
+                    foreach ($this->collPeriodos as $obj) {
+                        if (!$collPeriodos->contains($obj)) {
+                            $collPeriodos[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collPeriodos = $collPeriodos;
+                $this->collPeriodosPartial = false;
+            }
+        }
+
+        return $this->collPeriodos;
+    }
+
+    /**
+     * Sets a collection of Periodo objects related by a many-to-many relationship
+     * to the current object by way of the inscripcion cross-reference table.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param  Collection $periodos A Propel collection.
+     * @param  ConnectionInterface $con Optional connection object
+     * @return $this|ChildAlumno The current object (for fluent API support)
+     */
+    public function setPeriodos(Collection $periodos, ConnectionInterface $con = null)
+    {
+        $this->clearPeriodos();
+        $currentPeriodos = $this->getPeriodos();
+
+        $periodosScheduledForDeletion = $currentPeriodos->diff($periodos);
+
+        foreach ($periodosScheduledForDeletion as $toDelete) {
+            $this->removePeriodo($toDelete);
+        }
+
+        foreach ($periodos as $periodo) {
+            if (!$currentPeriodos->contains($periodo)) {
+                $this->doAddPeriodo($periodo);
+            }
+        }
+
+        $this->collPeriodosPartial = false;
+        $this->collPeriodos = $periodos;
+
+        return $this;
+    }
+
+    /**
+     * Gets the number of Periodo objects related by a many-to-many relationship
+     * to the current object by way of the inscripcion cross-reference table.
+     *
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      boolean $distinct Set to true to force count distinct
+     * @param      ConnectionInterface $con Optional connection object
+     *
+     * @return int the number of related Periodo objects
+     */
+    public function countPeriodos(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collPeriodosPartial && !$this->isNew();
+        if (null === $this->collPeriodos || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collPeriodos) {
+                return 0;
+            } else {
+
+                if ($partial && !$criteria) {
+                    return count($this->getPeriodos());
+                }
+
+                $query = ChildPeriodoQuery::create(null, $criteria);
+                if ($distinct) {
+                    $query->distinct();
+                }
+
+                return $query
+                    ->filterByAlumno($this)
+                    ->count($con);
+            }
+        } else {
+            return count($this->collPeriodos);
+        }
+    }
+
+    /**
+     * Associate a ChildPeriodo to this object
+     * through the inscripcion cross reference table.
+     * 
+     * @param ChildPeriodo $periodo
+     * @return ChildAlumno The current object (for fluent API support)
+     */
+    public function addPeriodo(ChildPeriodo $periodo)
+    {
+        if ($this->collPeriodos === null) {
+            $this->initPeriodos();
+        }
+
+        if (!$this->getPeriodos()->contains($periodo)) {
+            // only add it if the **same** object is not already associated
+            $this->collPeriodos->push($periodo);
+            $this->doAddPeriodo($periodo);
+        }
+
+        return $this;
+    }
+
+    /**
+     * 
+     * @param ChildPeriodo $periodo
+     */
+    protected function doAddPeriodo(ChildPeriodo $periodo)
+    {
+        $inscripcion = new ChildInscripcion();
+
+        $inscripcion->setPeriodo($periodo);
+
+        $inscripcion->setAlumno($this);
+
+        $this->addInscripcion($inscripcion);
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if (!$periodo->isAlumnosLoaded()) {
+            $periodo->initAlumnos();
+            $periodo->getAlumnos()->push($this);
+        } elseif (!$periodo->getAlumnos()->contains($this)) {
+            $periodo->getAlumnos()->push($this);
+        }
+
+    }
+
+    /**
+     * Remove periodo of this object
+     * through the inscripcion cross reference table.
+     * 
+     * @param ChildPeriodo $periodo
+     * @return ChildAlumno The current object (for fluent API support)
+     */
+    public function removePeriodo(ChildPeriodo $periodo)
+    {
+        if ($this->getPeriodos()->contains($periodo)) { $inscripcion = new ChildInscripcion();
+
+            $inscripcion->setPeriodo($periodo);
+            if ($periodo->isAlumnosLoaded()) {
+                //remove the back reference if available
+                $periodo->getAlumnos()->removeObject($this);
+            }
+
+            $inscripcion->setAlumno($this);
+            $this->removeInscripcion(clone $inscripcion);
+            $inscripcion->clear();
+
+            $this->collPeriodos->remove($this->collPeriodos->search($periodo));
+            
+            if (null === $this->periodosScheduledForDeletion) {
+                $this->periodosScheduledForDeletion = clone $this->collPeriodos;
+                $this->periodosScheduledForDeletion->clear();
+            }
+
+            $this->periodosScheduledForDeletion->push($periodo);
+        }
+
+
+        return $this;
+    }
+
+    /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
      * change of those foreign objects when you call `save` there).
@@ -1841,10 +2132,16 @@ abstract class Alumno implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
+            if ($this->collPeriodos) {
+                foreach ($this->collPeriodos as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
         } // if ($deep)
 
         $this->collInscripcions = null;
         $this->collResultados = null;
+        $this->collPeriodos = null;
     }
 
     /**

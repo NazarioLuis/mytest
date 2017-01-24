@@ -59,7 +59,7 @@ class PeriodoTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 4;
+    const NUM_COLUMNS = 6;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class PeriodoTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 4;
+    const NUM_HYDRATE_COLUMNS = 6;
 
     /**
      * the column name for the id field
@@ -92,6 +92,16 @@ class PeriodoTableMap extends TableMap
     const COL_PERIODO = 'periodo.periodo';
 
     /**
+     * the column name for the desde field
+     */
+    const COL_DESDE = 'periodo.desde';
+
+    /**
+     * the column name for the hasta field
+     */
+    const COL_HASTA = 'periodo.hasta';
+
+    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -103,11 +113,11 @@ class PeriodoTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Id', 'CarId', 'Anio', 'Periodo', ),
-        self::TYPE_CAMELNAME     => array('id', 'carId', 'anio', 'periodo', ),
-        self::TYPE_COLNAME       => array(PeriodoTableMap::COL_ID, PeriodoTableMap::COL_CAR_ID, PeriodoTableMap::COL_ANIO, PeriodoTableMap::COL_PERIODO, ),
-        self::TYPE_FIELDNAME     => array('id', 'car_id', 'anio', 'periodo', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, )
+        self::TYPE_PHPNAME       => array('Id', 'CarId', 'Anio', 'Periodo', 'Desde', 'Hasta', ),
+        self::TYPE_CAMELNAME     => array('id', 'carId', 'anio', 'periodo', 'desde', 'hasta', ),
+        self::TYPE_COLNAME       => array(PeriodoTableMap::COL_ID, PeriodoTableMap::COL_CAR_ID, PeriodoTableMap::COL_ANIO, PeriodoTableMap::COL_PERIODO, PeriodoTableMap::COL_DESDE, PeriodoTableMap::COL_HASTA, ),
+        self::TYPE_FIELDNAME     => array('id', 'car_id', 'anio', 'periodo', 'desde', 'hasta', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -117,11 +127,11 @@ class PeriodoTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Id' => 0, 'CarId' => 1, 'Anio' => 2, 'Periodo' => 3, ),
-        self::TYPE_CAMELNAME     => array('id' => 0, 'carId' => 1, 'anio' => 2, 'periodo' => 3, ),
-        self::TYPE_COLNAME       => array(PeriodoTableMap::COL_ID => 0, PeriodoTableMap::COL_CAR_ID => 1, PeriodoTableMap::COL_ANIO => 2, PeriodoTableMap::COL_PERIODO => 3, ),
-        self::TYPE_FIELDNAME     => array('id' => 0, 'car_id' => 1, 'anio' => 2, 'periodo' => 3, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'CarId' => 1, 'Anio' => 2, 'Periodo' => 3, 'Desde' => 4, 'Hasta' => 5, ),
+        self::TYPE_CAMELNAME     => array('id' => 0, 'carId' => 1, 'anio' => 2, 'periodo' => 3, 'desde' => 4, 'hasta' => 5, ),
+        self::TYPE_COLNAME       => array(PeriodoTableMap::COL_ID => 0, PeriodoTableMap::COL_CAR_ID => 1, PeriodoTableMap::COL_ANIO => 2, PeriodoTableMap::COL_PERIODO => 3, PeriodoTableMap::COL_DESDE => 4, PeriodoTableMap::COL_HASTA => 5, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'car_id' => 1, 'anio' => 2, 'periodo' => 3, 'desde' => 4, 'hasta' => 5, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -145,6 +155,8 @@ class PeriodoTableMap extends TableMap
         $this->addForeignKey('car_id', 'CarId', 'INTEGER', 'carrera', 'id', true, null, null);
         $this->addColumn('anio', 'Anio', 'VARCHAR', true, 4, null);
         $this->addColumn('periodo', 'Periodo', 'INTEGER', true, null, null);
+        $this->addColumn('desde', 'Desde', 'DATE', true, null, null);
+        $this->addColumn('hasta', 'Hasta', 'DATE', true, null, null);
     } // initialize()
 
     /**
@@ -173,6 +185,7 @@ class PeriodoTableMap extends TableMap
     1 => ':id',
   ),
 ), null, null, 'Inscripcions', false);
+        $this->addRelation('Alumno', '\\Alumno', RelationMap::MANY_TO_MANY, array(), null, null, 'Alumnos');
     } // buildRelations()
 
     /**
@@ -320,11 +333,15 @@ class PeriodoTableMap extends TableMap
             $criteria->addSelectColumn(PeriodoTableMap::COL_CAR_ID);
             $criteria->addSelectColumn(PeriodoTableMap::COL_ANIO);
             $criteria->addSelectColumn(PeriodoTableMap::COL_PERIODO);
+            $criteria->addSelectColumn(PeriodoTableMap::COL_DESDE);
+            $criteria->addSelectColumn(PeriodoTableMap::COL_HASTA);
         } else {
             $criteria->addSelectColumn($alias . '.id');
             $criteria->addSelectColumn($alias . '.car_id');
             $criteria->addSelectColumn($alias . '.anio');
             $criteria->addSelectColumn($alias . '.periodo');
+            $criteria->addSelectColumn($alias . '.desde');
+            $criteria->addSelectColumn($alias . '.hasta');
         }
     }
 

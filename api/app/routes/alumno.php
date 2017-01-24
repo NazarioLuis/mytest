@@ -10,14 +10,9 @@ $app->any('/alumnos[/{id}]',
 	    }elseif ($request->isPost()) {
             $input = json_decode($request->getBody());
             $alumno = new Alumno();
-            if(isset($input->Id))
-                $alumno = \Base\AlumnoQuery::create()->findPk($input->Id);
             cargarAlumno($alumno, $input)->save();
             retornarAlumnosJSON($response);
-        }elseif ($request->isPut()) {
-            $input = json_decode($request->getBody());
 
-            retornarAlumnosJSON($response);
         }
     }else{
         if ($request->isGet()) {
@@ -28,6 +23,11 @@ $app->any('/alumnos[/{id}]',
         }
     }
 });
+
+$app->get('/alumnos/doc/{doc}',
+    function (\Slim\Http\Request $request, \Slim\Http\Response $response, $args) {
+        retornarAlumnoPorDocumentoJSON($response, $args['doc']);
+    });
 
 //Retorna un json que contiene una lista obtenida de la bd
 function retornarAlumnosJSON($response){
@@ -43,13 +43,26 @@ function retornarAlumnoComoJSON($response, $id){
     $response->getBody()->write(\Base\AlumnoQuery::create()->findPk($id)->toJSON());
 }
 
+//Recupera por documento
+function retornarAlumnoPorDocumentoJSON($response, $doc){
+    $response->withHeader("Content-type", "application/json");
+    $response->withStatus(200);
+    $result = \Base\AlumnoQuery::create()
+        ->findByDocumento($doc);
+    $response->getBody()->write($result->toJSON());
+}
+
 //Carga los valore recibidos mediante rest a los atributos del objeto
 function cargarAlumno(\Base\Alumno $a, $input){
+    if(isset($input->Id)){
+        $a = \Base\AlumnoQuery::create()->findPk($input->Id);
+    }else{
+        $pass = new Pass();
+        $a->setSenia($pass->encryptIt($pass->generaPass()));
+    }
     $a->setNombre($input->Nombre);
     $a->setApellido($input->Apellido);
     $a->setDocumento($input->Documento);
-    $pass = new Pass();
-    $a->setSenia($pass->encryptIt($pass->generaPass()));
     return $a;
 }
 

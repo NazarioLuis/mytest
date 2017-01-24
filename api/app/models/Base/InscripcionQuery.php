@@ -22,9 +22,11 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     ChildInscripcionQuery orderByPerId($order = Criteria::ASC) Order by the per_id column
  * @method     ChildInscripcionQuery orderByAluId($order = Criteria::ASC) Order by the alu_id column
+ * @method     ChildInscripcionQuery orderByOrden($order = Criteria::ASC) Order by the orden column
  *
  * @method     ChildInscripcionQuery groupByPerId() Group by the per_id column
  * @method     ChildInscripcionQuery groupByAluId() Group by the alu_id column
+ * @method     ChildInscripcionQuery groupByOrden() Group by the orden column
  *
  * @method     ChildInscripcionQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildInscripcionQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -60,17 +62,20 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildInscripcion findOneOrCreate(ConnectionInterface $con = null) Return the first ChildInscripcion matching the query, or a new ChildInscripcion object populated from the query conditions when no match is found
  *
  * @method     ChildInscripcion findOneByPerId(int $per_id) Return the first ChildInscripcion filtered by the per_id column
- * @method     ChildInscripcion findOneByAluId(int $alu_id) Return the first ChildInscripcion filtered by the alu_id column *
+ * @method     ChildInscripcion findOneByAluId(int $alu_id) Return the first ChildInscripcion filtered by the alu_id column
+ * @method     ChildInscripcion findOneByOrden(int $orden) Return the first ChildInscripcion filtered by the orden column *
 
  * @method     ChildInscripcion requirePk($key, ConnectionInterface $con = null) Return the ChildInscripcion by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildInscripcion requireOne(ConnectionInterface $con = null) Return the first ChildInscripcion matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildInscripcion requireOneByPerId(int $per_id) Return the first ChildInscripcion filtered by the per_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildInscripcion requireOneByAluId(int $alu_id) Return the first ChildInscripcion filtered by the alu_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildInscripcion requireOneByOrden(int $orden) Return the first ChildInscripcion filtered by the orden column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildInscripcion[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildInscripcion objects based on current ModelCriteria
  * @method     ChildInscripcion[]|ObjectCollection findByPerId(int $per_id) Return ChildInscripcion objects filtered by the per_id column
  * @method     ChildInscripcion[]|ObjectCollection findByAluId(int $alu_id) Return ChildInscripcion objects filtered by the alu_id column
+ * @method     ChildInscripcion[]|ObjectCollection findByOrden(int $orden) Return ChildInscripcion objects filtered by the orden column
  * @method     ChildInscripcion[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -163,7 +168,7 @@ abstract class InscripcionQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT per_id, alu_id FROM inscripcion WHERE per_id = :p0 AND alu_id = :p1';
+        $sql = 'SELECT per_id, alu_id, orden FROM inscripcion WHERE per_id = :p0 AND alu_id = :p1';
         try {
             $stmt = $con->prepare($sql);            
             $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);            
@@ -349,6 +354,47 @@ abstract class InscripcionQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(InscripcionTableMap::COL_ALU_ID, $aluId, $comparison);
+    }
+
+    /**
+     * Filter the query on the orden column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByOrden(1234); // WHERE orden = 1234
+     * $query->filterByOrden(array(12, 34)); // WHERE orden IN (12, 34)
+     * $query->filterByOrden(array('min' => 12)); // WHERE orden > 12
+     * </code>
+     *
+     * @param     mixed $orden The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildInscripcionQuery The current query, for fluid interface
+     */
+    public function filterByOrden($orden = null, $comparison = null)
+    {
+        if (is_array($orden)) {
+            $useMinMax = false;
+            if (isset($orden['min'])) {
+                $this->addUsingAlias(InscripcionTableMap::COL_ORDEN, $orden['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($orden['max'])) {
+                $this->addUsingAlias(InscripcionTableMap::COL_ORDEN, $orden['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(InscripcionTableMap::COL_ORDEN, $orden, $comparison);
     }
 
     /**

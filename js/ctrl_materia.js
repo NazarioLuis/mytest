@@ -12,7 +12,7 @@ app.controller('materiaCtlr', function(MyService,$scope,$filter, $http) {
 
     $http.get('api/materias').
     success(function(data) {
-        $scope.resultados = data.Materias;
+        $scope.resultados = data;
     }).error(function(){
         console.log('Error de datos');
     });
@@ -20,7 +20,8 @@ app.controller('materiaCtlr', function(MyService,$scope,$filter, $http) {
     $http.get('api/carreras').
     success(function(data) {
         $scope.carreras = data.Carreras;
-        $scope.$broadcast('dataloaded');
+        $scope.$broadcast('dataloaded',{ele:'carreraFilter'});
+        $scope.$broadcast('dataloaded',{ele:'carrera'});
     }).error(function(){
         console.log('Error de datos');
     });
@@ -29,9 +30,10 @@ app.controller('materiaCtlr', function(MyService,$scope,$filter, $http) {
         if(validar(datos)){
             $http.post('api/materias',datos)
                 .success(function(data){
-                    console.log(data);
-                    $scope.resultados = data.Materias;
+                    $scope.resultados = data;
                     $scope.cambiarVisibilidad();
+                }).error(function(){
+                    MyService.error("No se puede elminar, pues esta en uso!");
                 });
         }
     };
@@ -39,7 +41,7 @@ app.controller('materiaCtlr', function(MyService,$scope,$filter, $http) {
     $scope.eliminar = function($id){
         $http.delete('api/materias/'+$id)
             .success(function(data){
-                $scope.resultados = data.Materias;
+                $scope.resultados = data;
             }).error(function(){
             console.log('Error de datos');
         });

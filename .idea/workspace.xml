@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-<<<<<<< HEAD
-    <list default="true" id="1ecd4142-4ef2-46c8-b38e-94295fc07fbc" name="Default" comment="" />
-=======
     <list default="true" id="1ecd4142-4ef2-46c8-b38e-94295fc07fbc" name="Default" comment="">
 <<<<<<< HEAD
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
@@ -17,7 +14,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/materia.html" afterPath="$PROJECT_DIR$/templates/materia.html" />
 >>>>>>> origin/master
     </list>
->>>>>>> origin/master
     <ignored path="mytest.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/dataSources.local.xml" />
@@ -694,11 +690,7 @@
     <editor active="false" />
 =======
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
-<<<<<<< HEAD
-    <editor active="false" />
-=======
     <editor active="true" />
->>>>>>> origin/master
 >>>>>>> origin/master
     <layout>
       <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17935579" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />

@@ -572,6 +572,23 @@ abstract class AlumnoQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query by a related Periodo object
+     * using the inscripcion table as cross reference
+     *
+     * @param Periodo $periodo the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildAlumnoQuery The current query, for fluid interface
+     */
+    public function filterByPeriodo($periodo, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useInscripcionQuery()
+            ->filterByPeriodo($periodo, $comparison)
+            ->endUse();
+    }
+
+    /**
      * Exclude object from result
      *
      * @param   ChildAlumno $alumno Object to remove from the list of results

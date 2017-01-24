@@ -1,0 +1,77 @@
+<div ng-controller="inscripcionCtlr">
+    <h3 class="center">{{titulo}}</h3>
+    <div class="row">
+        <div class="input-field col s6" >
+            <select id="carrera" ng-model="carrera"
+                    ng-options="c.Id as c.Descripcion for c in carreras track by c.Id" display-select>
+                <option value="">--Seleccionar una Carrera--</option>
+            </select>
+        </div>
+        <div class="input-field col s6" >
+            <select id="periodo" ng-model="periodo"
+                    ng-options="p.Id as  p.Anio+'/0'+p.Periodo for p in periodos track by p.Id" display-select>
+                <option value="">--Seleccionar el Periodo Lectivo--</option>
+            </select>
+        </div>
+    </div>
+
+    <br>
+
+    <div ng-show="mostrarTabla">
+        <p class="red-text">{{error}}</p>
+        <form ng-submit="confirmar(form)">
+            <div class="row">
+                <div class="col s2">
+                    <label for="documento">Documento</label>
+                    <input placeholder="Nro de Documento" maxlength="15" id="documento" type="text"
+                           ng-model="form.Documento" ng-keypress="buscarAlumno($event)" required/>
+                </div>
+                <div class="col s4">
+                    <label for="nombre">Nombre</label>
+                    <input maxlength="40" placeholder="Ingrese el Nombre del Alumno" id="nombre" type="text"
+                           ng-disabled="aluExiste" ng-model="form.Nombre" required/>
+                </div>
+                <div class="col s3">
+                    <label for="apellido">Apellido</label>
+                    <input maxlength="40" placeholder="Ingrese el Apellido del Alumno" id="apellido" type="text"
+                           ng-disabled="aluExiste" ng-model="form.Apellido" required/>
+                </div>
+                <div class="col s3">
+                    <br>
+                    <button class="waves-effect waves-light btn">
+                        <i class="material-icons right">check</i>Inscribir
+                    </button>
+                </div>
+            </div>
+        </form>
+
+
+        <div>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Id Alumno</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Documento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="x in alumnos">
+                        <td>{{ x.Id }}</td>
+                        <td>{{ x.Nombre }}</td>
+                        <td>{{ x.Apellido }}</td>
+                        <td>{{ x.Documento }}</td>
+                        <td>
+                            <button class="btn-floating red" confirmed-click="eliminar({{ x.Id }})"
+                                    ng-confirm-click="Esta seguro que desea quitar el alumno {{ x.Nombre +' '+ x.Apellido}}">
+                                <i class="material-icons">delete</i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

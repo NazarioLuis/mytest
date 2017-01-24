@@ -19,13 +19,15 @@ $app->any('/materias[/{id}]',
         }
     }else{
         if ($request->isGet()) {
-            retornarMateriaComoJSON($response, $args['id']);
+            retornarMateriasPorCarreraJSON($response, $args['id']);
         }elseif ($request->isDelete()) {
             \Base\MateriaQuery::create()->findPk($args['id'])->delete();
             retornarMateriasJSON($response);
         }
     }
 });
+
+
 
 //Retorna un json que contiene una lista obtenida de la bd
 function retornarMateriasJSON($response){
@@ -35,20 +37,21 @@ function retornarMateriasJSON($response){
         ->join('Carrera')
         ->select(array('Id','Descripcion','CarId','Carrera.Descripcion','Observacion'))
         ->find();
-    $response->getBody()->write($result->toJSON());
+    $response->getBody()->write(json_encode($result->toArray(),JSON_NUMERIC_CHECK));
 }
 
-//Retorna un json que contiene la fila que cumpla con la condicion fk = ?
-function retornarMateriaComoJSON($response, $id){
+
+//Retorna un json que contiene una lista obtenida de la bd
+function retornarMateriasPorCarreraJSON($response,$id){
     $response->withHeader("Content-type", "application/json");
     $response->withStatus(200);
     $result = \Base\MateriaQuery::create()
         ->join('Carrera')
         ->select(array('Id','Descripcion','CarId','Carrera.Descripcion','Observacion'))
-        ->findPk($id);
-    $response->getBody()->write(json_encode($result));
+        ->filterByCarId($id)
+        ->find();
+    $response->getBody()->write($result->toJSON());
 }
-
 //Carga los valore recibidos mediante rest a los atributos del objeto
 function cargarMateria(\Base\Materia $m, $input){
     $m->setDescripcion($input->Descripcion);

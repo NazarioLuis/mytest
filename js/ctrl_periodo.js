@@ -1,9 +1,9 @@
-//Controlador del template de registro de Materias
+//Controlador del template de registro de Periodos
 app.controller('periodoCtlr', function(MyService,$scope,$filter, $http) {
     $scope.titulo = "Registro de Periodos Lectivos";
     $scope.resultados = [];
     $scope.carreras = [];
-    $scope.form = {CarId:''};
+    $scope.form = {CarId:'',Desde:null,Hasta:null};
     $scope.mostrarTabla = true;
     $scope.guardar = true;
     $scope.error = '';
@@ -12,7 +12,7 @@ app.controller('periodoCtlr', function(MyService,$scope,$filter, $http) {
 
     $http.get('api/periodos').
     success(function(data) {
-        $scope.resultados = data.Periodos;
+        $scope.resultados = formatearDatos(data);
     }).error(function(){
         console.log('Error de datos');
     });
@@ -20,7 +20,8 @@ app.controller('periodoCtlr', function(MyService,$scope,$filter, $http) {
     $http.get('api/carreras').
     success(function(data) {
         $scope.carreras = data.Carreras;
-        $scope.$broadcast('dataloaded');
+        $scope.$broadcast('dataloaded',{ele:'carreraFilter'});
+        $scope.$broadcast('dataloaded',{ele:'carrera'});
     }).error(function(){
         console.log('Error de datos');
     });
@@ -30,8 +31,7 @@ app.controller('periodoCtlr', function(MyService,$scope,$filter, $http) {
         if(validar(datos)){
             $http.post('api/periodos',datos)
                 .success(function(data){
-                    console.log(data);
-                    $scope.resultados = data.Periodos;
+                    $scope.resultados = formatearDatos(data);
                     $scope.cambiarVisibilidad();
                 });
         }
@@ -40,10 +40,10 @@ app.controller('periodoCtlr', function(MyService,$scope,$filter, $http) {
     $scope.eliminar = function($id){
         $http.delete('api/periodos/'+$id)
             .success(function(data){
-                $scope.resultados = data.Periodos;
+                $scope.resultados = formatearDatos(data);
             }).error(function(){
-            console.log('Error de datos');
-        });
+                MyService.error("No se puede elminar, pues esta en uso!");
+            });
     };
 
     $scope.selecionarObjeto = function(id){
@@ -55,7 +55,7 @@ app.controller('periodoCtlr', function(MyService,$scope,$filter, $http) {
 
     $scope.cambiarVisibilidad = function(){
         if($scope.mostrarTabla == false){
-            $scope.form = {CarId:''};
+            $scope.form = {CarId:'',Desde:null,Hasta:null};
             $scope.guardar = true;
             $scope.error = "";
         }
@@ -108,5 +108,23 @@ app.controller('periodoCtlr', function(MyService,$scope,$filter, $http) {
             }
         }
         return true;
+    }
+
+    formatearDatos = function(lista){
+        var i=0, len=lista.length;
+        for (; i<len; i++) {
+            console.log(lista[i]);
+            lista[i].Desde = new Date(lista[i].Desde);
+            lista[i].DesdeFormato = formatearFecha(lista[i].Desde);
+            lista[i].Hasta = new Date(lista[i].Hasta);
+            lista[i].HastaFormato = formatearFecha(lista[i].Hasta);
+        }
+        return lista;
+    }
+
+    formatearFecha = function(fecha){
+        d = fecha.getUTCDate()<10 ? '0'+fecha.getUTCDate():fecha.getUTCDate();
+        m = fecha.getUTCMonth()<10 ? '0'+(fecha.getUTCMonth()+1):(fecha.getUTCMonth()+1);
+        return [d,m,fecha.getUTCFullYear()].join('/');
     }
 });

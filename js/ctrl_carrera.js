@@ -29,8 +29,8 @@ app.controller('carreraCtlr', function(MyService,$scope,$filter, $http) {
             .success(function(data){
                 $scope.resultados = data.Carreras;
             }).error(function(){
-            console.log('Error de datos');
-        });
+                MyService.error("No se puede elminar, pues esta en uso!");
+            });
     };
 
 

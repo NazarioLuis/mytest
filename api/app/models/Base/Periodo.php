@@ -2,6 +2,8 @@
 
 namespace Base;
 
+use \Alumno as ChildAlumno;
+use \AlumnoQuery as ChildAlumnoQuery;
 use \Carrera as ChildCarrera;
 use \CarreraQuery as ChildCarreraQuery;
 use \Examen as ChildExamen;
@@ -10,6 +12,7 @@ use \Inscripcion as ChildInscripcion;
 use \InscripcionQuery as ChildInscripcionQuery;
 use \Periodo as ChildPeriodo;
 use \PeriodoQuery as ChildPeriodoQuery;
+use \DateTime;
 use \Exception;
 use \PDO;
 use Map\ExamenTableMap;
@@ -27,6 +30,7 @@ use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
+use Propel\Runtime\Util\PropelDateTime;
 
 /**
  * Base class that represents a row from the 'periodo' table.
@@ -98,6 +102,20 @@ abstract class Periodo implements ActiveRecordInterface
     protected $periodo;
 
     /**
+     * The value for the desde field.
+     * 
+     * @var        \DateTime
+     */
+    protected $desde;
+
+    /**
+     * The value for the hasta field.
+     * 
+     * @var        \DateTime
+     */
+    protected $hasta;
+
+    /**
      * @var        ChildCarrera
      */
     protected $aCarrera;
@@ -115,12 +133,28 @@ abstract class Periodo implements ActiveRecordInterface
     protected $collInscripcionsPartial;
 
     /**
+     * @var        ObjectCollection|ChildAlumno[] Cross Collection to store aggregation of ChildAlumno objects.
+     */
+    protected $collAlumnos;
+
+    /**
+     * @var bool
+     */
+    protected $collAlumnosPartial;
+
+    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      *
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildAlumno[]
+     */
+    protected $alumnosScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -400,6 +434,46 @@ abstract class Periodo implements ActiveRecordInterface
     }
 
     /**
+     * Get the [optionally formatted] temporal [desde] column value.
+     * 
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getDesde($format = NULL)
+    {
+        if ($format === null) {
+            return $this->desde;
+        } else {
+            return $this->desde instanceof \DateTime ? $this->desde->format($format) : null;
+        }
+    }
+
+    /**
+     * Get the [optionally formatted] temporal [hasta] column value.
+     * 
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getHasta($format = NULL)
+    {
+        if ($format === null) {
+            return $this->hasta;
+        } else {
+            return $this->hasta instanceof \DateTime ? $this->hasta->format($format) : null;
+        }
+    }
+
+    /**
      * Set the value of [id] column.
      * 
      * @param int $v new value
@@ -484,6 +558,46 @@ abstract class Periodo implements ActiveRecordInterface
     } // setPeriodo()
 
     /**
+     * Sets the value of [desde] column to a normalized version of the date/time value specified.
+     * 
+     * @param  mixed $v string, integer (timestamp), or \DateTime value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\Periodo The current object (for fluent API support)
+     */
+    public function setDesde($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->desde !== null || $dt !== null) {
+            if ($this->desde === null || $dt === null || $dt->format("Y-m-d") !== $this->desde->format("Y-m-d")) {
+                $this->desde = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[PeriodoTableMap::COL_DESDE] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setDesde()
+
+    /**
+     * Sets the value of [hasta] column to a normalized version of the date/time value specified.
+     * 
+     * @param  mixed $v string, integer (timestamp), or \DateTime value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\Periodo The current object (for fluent API support)
+     */
+    public function setHasta($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->hasta !== null || $dt !== null) {
+            if ($this->hasta === null || $dt === null || $dt->format("Y-m-d") !== $this->hasta->format("Y-m-d")) {
+                $this->hasta = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[PeriodoTableMap::COL_HASTA] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setHasta()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -530,6 +644,18 @@ abstract class Periodo implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : PeriodoTableMap::translateFieldName('Periodo', TableMap::TYPE_PHPNAME, $indexType)];
             $this->periodo = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : PeriodoTableMap::translateFieldName('Desde', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00') {
+                $col = null;
+            }
+            $this->desde = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : PeriodoTableMap::translateFieldName('Hasta', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00') {
+                $col = null;
+            }
+            $this->hasta = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -538,7 +664,7 @@ abstract class Periodo implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 4; // 4 = PeriodoTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 6; // 6 = PeriodoTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\Periodo'), 0, $e);
@@ -607,6 +733,7 @@ abstract class Periodo implements ActiveRecordInterface
 
             $this->collInscripcions = null;
 
+            $this->collAlumnos = null;
         } // if (deep)
     }
 
@@ -729,6 +856,35 @@ abstract class Periodo implements ActiveRecordInterface
                 $this->resetModified();
             }
 
+            if ($this->alumnosScheduledForDeletion !== null) {
+                if (!$this->alumnosScheduledForDeletion->isEmpty()) {
+                    $pks = array();
+                    foreach ($this->alumnosScheduledForDeletion as $entry) {
+                        $entryPk = [];
+
+                        $entryPk[0] = $this->getId();
+                        $entryPk[1] = $entry->getId();
+                        $pks[] = $entryPk;
+                    }
+
+                    \InscripcionQuery::create()
+                        ->filterByPrimaryKeys($pks)
+                        ->delete($con);
+
+                    $this->alumnosScheduledForDeletion = null;
+                }
+
+            }
+
+            if ($this->collAlumnos) {
+                foreach ($this->collAlumnos as $alumno) {
+                    if (!$alumno->isDeleted() && ($alumno->isNew() || $alumno->isModified())) {
+                        $alumno->save($con);
+                    }
+                }
+            }
+
+
             if ($this->examensScheduledForDeletion !== null) {
                 if (!$this->examensScheduledForDeletion->isEmpty()) {
                     \ExamenQuery::create()
@@ -801,6 +957,12 @@ abstract class Periodo implements ActiveRecordInterface
         if ($this->isColumnModified(PeriodoTableMap::COL_PERIODO)) {
             $modifiedColumns[':p' . $index++]  = 'periodo';
         }
+        if ($this->isColumnModified(PeriodoTableMap::COL_DESDE)) {
+            $modifiedColumns[':p' . $index++]  = 'desde';
+        }
+        if ($this->isColumnModified(PeriodoTableMap::COL_HASTA)) {
+            $modifiedColumns[':p' . $index++]  = 'hasta';
+        }
 
         $sql = sprintf(
             'INSERT INTO periodo (%s) VALUES (%s)',
@@ -823,6 +985,12 @@ abstract class Periodo implements ActiveRecordInterface
                         break;
                     case 'periodo':                        
                         $stmt->bindValue($identifier, $this->periodo, PDO::PARAM_INT);
+                        break;
+                    case 'desde':                        
+                        $stmt->bindValue($identifier, $this->desde ? $this->desde->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
+                        break;
+                    case 'hasta':                        
+                        $stmt->bindValue($identifier, $this->hasta ? $this->hasta->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -898,6 +1066,12 @@ abstract class Periodo implements ActiveRecordInterface
             case 3:
                 return $this->getPeriodo();
                 break;
+            case 4:
+                return $this->getDesde();
+                break;
+            case 5:
+                return $this->getHasta();
+                break;
             default:
                 return null;
                 break;
@@ -932,7 +1106,17 @@ abstract class Periodo implements ActiveRecordInterface
             $keys[1] => $this->getCarId(),
             $keys[2] => $this->getAnio(),
             $keys[3] => $this->getPeriodo(),
+            $keys[4] => $this->getDesde(),
+            $keys[5] => $this->getHasta(),
         );
+        if ($result[$keys[4]] instanceof \DateTime) {
+            $result[$keys[4]] = $result[$keys[4]]->format('c');
+        }
+        
+        if ($result[$keys[5]] instanceof \DateTime) {
+            $result[$keys[5]] = $result[$keys[5]]->format('c');
+        }
+        
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
             $result[$key] = $virtualColumn;
@@ -1030,6 +1214,12 @@ abstract class Periodo implements ActiveRecordInterface
             case 3:
                 $this->setPeriodo($value);
                 break;
+            case 4:
+                $this->setDesde($value);
+                break;
+            case 5:
+                $this->setHasta($value);
+                break;
         } // switch()
 
         return $this;
@@ -1067,6 +1257,12 @@ abstract class Periodo implements ActiveRecordInterface
         }
         if (array_key_exists($keys[3], $arr)) {
             $this->setPeriodo($arr[$keys[3]]);
+        }
+        if (array_key_exists($keys[4], $arr)) {
+            $this->setDesde($arr[$keys[4]]);
+        }
+        if (array_key_exists($keys[5], $arr)) {
+            $this->setHasta($arr[$keys[5]]);
         }
     }
 
@@ -1120,6 +1316,12 @@ abstract class Periodo implements ActiveRecordInterface
         }
         if ($this->isColumnModified(PeriodoTableMap::COL_PERIODO)) {
             $criteria->add(PeriodoTableMap::COL_PERIODO, $this->periodo);
+        }
+        if ($this->isColumnModified(PeriodoTableMap::COL_DESDE)) {
+            $criteria->add(PeriodoTableMap::COL_DESDE, $this->desde);
+        }
+        if ($this->isColumnModified(PeriodoTableMap::COL_HASTA)) {
+            $criteria->add(PeriodoTableMap::COL_HASTA, $this->hasta);
         }
 
         return $criteria;
@@ -1210,6 +1412,8 @@ abstract class Periodo implements ActiveRecordInterface
         $copyObj->setCarId($this->getCarId());
         $copyObj->setAnio($this->getAnio());
         $copyObj->setPeriodo($this->getPeriodo());
+        $copyObj->setDesde($this->getDesde());
+        $copyObj->setHasta($this->getHasta());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -1832,6 +2036,249 @@ abstract class Periodo implements ActiveRecordInterface
     }
 
     /**
+     * Clears out the collAlumnos collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addAlumnos()
+     */
+    public function clearAlumnos()
+    {
+        $this->collAlumnos = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Initializes the collAlumnos crossRef collection.
+     *
+     * By default this just sets the collAlumnos collection to an empty collection (like clearAlumnos());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @return void
+     */
+    public function initAlumnos()
+    {
+        $collectionClassName = InscripcionTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collAlumnos = new $collectionClassName;
+        $this->collAlumnosPartial = true;
+        $this->collAlumnos->setModel('\Alumno');
+    }
+
+    /**
+     * Checks if the collAlumnos collection is loaded.
+     *
+     * @return bool
+     */
+    public function isAlumnosLoaded()
+    {
+        return null !== $this->collAlumnos;
+    }
+
+    /**
+     * Gets a collection of ChildAlumno objects related by a many-to-many relationship
+     * to the current object by way of the inscripcion cross-reference table.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildPeriodo is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      ConnectionInterface $con Optional connection object
+     *
+     * @return ObjectCollection|ChildAlumno[] List of ChildAlumno objects
+     */
+    public function getAlumnos(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collAlumnosPartial && !$this->isNew();
+        if (null === $this->collAlumnos || null !== $criteria || $partial) {
+            if ($this->isNew()) {
+                // return empty collection
+                if (null === $this->collAlumnos) {
+                    $this->initAlumnos();
+                }
+            } else {
+
+                $query = ChildAlumnoQuery::create(null, $criteria)
+                    ->filterByPeriodo($this);
+                $collAlumnos = $query->find($con);
+                if (null !== $criteria) {
+                    return $collAlumnos;
+                }
+
+                if ($partial && $this->collAlumnos) {
+                    //make sure that already added objects gets added to the list of the database.
+                    foreach ($this->collAlumnos as $obj) {
+                        if (!$collAlumnos->contains($obj)) {
+                            $collAlumnos[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collAlumnos = $collAlumnos;
+                $this->collAlumnosPartial = false;
+            }
+        }
+
+        return $this->collAlumnos;
+    }
+
+    /**
+     * Sets a collection of Alumno objects related by a many-to-many relationship
+     * to the current object by way of the inscripcion cross-reference table.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param  Collection $alumnos A Propel collection.
+     * @param  ConnectionInterface $con Optional connection object
+     * @return $this|ChildPeriodo The current object (for fluent API support)
+     */
+    public function setAlumnos(Collection $alumnos, ConnectionInterface $con = null)
+    {
+        $this->clearAlumnos();
+        $currentAlumnos = $this->getAlumnos();
+
+        $alumnosScheduledForDeletion = $currentAlumnos->diff($alumnos);
+
+        foreach ($alumnosScheduledForDeletion as $toDelete) {
+            $this->removeAlumno($toDelete);
+        }
+
+        foreach ($alumnos as $alumno) {
+            if (!$currentAlumnos->contains($alumno)) {
+                $this->doAddAlumno($alumno);
+            }
+        }
+
+        $this->collAlumnosPartial = false;
+        $this->collAlumnos = $alumnos;
+
+        return $this;
+    }
+
+    /**
+     * Gets the number of Alumno objects related by a many-to-many relationship
+     * to the current object by way of the inscripcion cross-reference table.
+     *
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      boolean $distinct Set to true to force count distinct
+     * @param      ConnectionInterface $con Optional connection object
+     *
+     * @return int the number of related Alumno objects
+     */
+    public function countAlumnos(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collAlumnosPartial && !$this->isNew();
+        if (null === $this->collAlumnos || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collAlumnos) {
+                return 0;
+            } else {
+
+                if ($partial && !$criteria) {
+                    return count($this->getAlumnos());
+                }
+
+                $query = ChildAlumnoQuery::create(null, $criteria);
+                if ($distinct) {
+                    $query->distinct();
+                }
+
+                return $query
+                    ->filterByPeriodo($this)
+                    ->count($con);
+            }
+        } else {
+            return count($this->collAlumnos);
+        }
+    }
+
+    /**
+     * Associate a ChildAlumno to this object
+     * through the inscripcion cross reference table.
+     * 
+     * @param ChildAlumno $alumno
+     * @return ChildPeriodo The current object (for fluent API support)
+     */
+    public function addAlumno(ChildAlumno $alumno)
+    {
+        if ($this->collAlumnos === null) {
+            $this->initAlumnos();
+        }
+
+        if (!$this->getAlumnos()->contains($alumno)) {
+            // only add it if the **same** object is not already associated
+            $this->collAlumnos->push($alumno);
+            $this->doAddAlumno($alumno);
+        }
+
+        return $this;
+    }
+
+    /**
+     * 
+     * @param ChildAlumno $alumno
+     */
+    protected function doAddAlumno(ChildAlumno $alumno)
+    {
+        $inscripcion = new ChildInscripcion();
+
+        $inscripcion->setAlumno($alumno);
+
+        $inscripcion->setPeriodo($this);
+
+        $this->addInscripcion($inscripcion);
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if (!$alumno->isPeriodosLoaded()) {
+            $alumno->initPeriodos();
+            $alumno->getPeriodos()->push($this);
+        } elseif (!$alumno->getPeriodos()->contains($this)) {
+            $alumno->getPeriodos()->push($this);
+        }
+
+    }
+
+    /**
+     * Remove alumno of this object
+     * through the inscripcion cross reference table.
+     * 
+     * @param ChildAlumno $alumno
+     * @return ChildPeriodo The current object (for fluent API support)
+     */
+    public function removeAlumno(ChildAlumno $alumno)
+    {
+        if ($this->getAlumnos()->contains($alumno)) { $inscripcion = new ChildInscripcion();
+
+            $inscripcion->setAlumno($alumno);
+            if ($alumno->isPeriodosLoaded()) {
+                //remove the back reference if available
+                $alumno->getPeriodos()->removeObject($this);
+            }
+
+            $inscripcion->setPeriodo($this);
+            $this->removeInscripcion(clone $inscripcion);
+            $inscripcion->clear();
+
+            $this->collAlumnos->remove($this->collAlumnos->search($alumno));
+            
+            if (null === $this->alumnosScheduledForDeletion) {
+                $this->alumnosScheduledForDeletion = clone $this->collAlumnos;
+                $this->alumnosScheduledForDeletion->clear();
+            }
+
+            $this->alumnosScheduledForDeletion->push($alumno);
+        }
+
+
+        return $this;
+    }
+
+    /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
      * change of those foreign objects when you call `save` there).
@@ -1845,6 +2292,8 @@ abstract class Periodo implements ActiveRecordInterface
         $this->car_id = null;
         $this->anio = null;
         $this->periodo = null;
+        $this->desde = null;
+        $this->hasta = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1873,10 +2322,16 @@ abstract class Periodo implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
+            if ($this->collAlumnos) {
+                foreach ($this->collAlumnos as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
         } // if ($deep)
 
         $this->collExamens = null;
         $this->collInscripcions = null;
+        $this->collAlumnos = null;
         $this->aCarrera = null;
     }
 

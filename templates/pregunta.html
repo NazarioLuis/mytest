@@ -1,0 +1,98 @@
+<div ng-controller="preguntaCtlr">
+    <p class="center">
+        {{'Prueba '+( par['examen'].Formativa?'Formativa':'Sumativa')+' de '+
+        par['examen']['Materia.Descripcion']}}<br>
+        {{par['periodo']['Carrera.Descripcion']+', ' +
+        'periodo lectivo '+par['periodo'].Anio+"/0"+par['periodo'].Periodo}} <br>
+        {{'Fecha: '+par['examen'].FechaFormato}}
+    </p>
+
+    <div>
+        <form ng-submit="agregarPregunta(pregunta)">
+            <label for="pregunta">Nueva Pregunta</label>
+            <textarea type="text" id="pregunta" ng-model="pregunta" required></textarea>
+            <button style="text-align: center" class="btn" type="submit">
+                Agregar
+                <i class="material-icons right">done</i>
+            </button>
+        </form>
+    </div>
+
+    <p class="center {{error?'red-text':'green-text'}}">{{message}}</p>
+
+    <div>
+        <h5 class="center">Preguntas</h5>
+
+        <div class="preguntas" ng-repeat="x in preguntas | orderBy:'Id':true">
+            <div class="pregunta">
+                <div class="row">
+                    <div style="float: left">
+                        <b>{{x.Id+') '}}</b>
+                    </div>
+                    <div class="col s11">
+                        <textarea type="text" ng-model="x.Texto"></textarea>
+                    </div>
+                    <div class="s2 right">
+                        <button class="btn-floating red" style=""
+                                confirmed-click= "quitarPregunta(x.Id)"
+                                ng-confirm-click="Esta seguro que desea quitar la pregunta {{ x.Texto }}">
+                            <i class="material-icons">delete</i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="row respuestas">
+                <div class="col s10 offset-s2">
+                    <div class="row" ng-repeat="r in x.Respuestas">
+                        <input id="iscorrecto{{x.Id+'/'+r.Id}}" type="checkbox" ng-model="r.Correcto"
+                            ng-click="cambiarSeleccion(x.Id, r.Id)">
+                        <label for="iscorrecto{{x.Id+'/'+r.Id}}">{{abc[r.Id]+') '+ r.Texto}}</label>
+                        <a href="#" ng-click="quitarRespuesta(x.Id,r.Id)" class="quitar">
+                            <i class="material-icons">close</i>
+                        </a>
+                    </div>
+                </div>
+                <form ng-submit="agregarRespuesta(formsRespuesta[(x.Id-1)])">
+                    <input type="hidden" ng-model="formsRespuesta[(x.Id-1)].preId"
+                           ng-init="formsRespuesta[(x.Id-1)].preId = x.Id">
+
+                    <div class="col s6 offset-s2">
+                        <label for="respuesta">Respuesta</label>
+                        <input id="respuesta" type="text" ng-model="formsRespuesta[(x.Id-1)].texto" required>
+                    </div>
+                    <div class="col s2">
+                        <br>
+                        <input id="correcto{{x.Id}}" ng-model="formsRespuesta[(x.Id-1)].correcto"
+                               ng-init="respuesta.correcto=false" type="checkbox">
+                        <label for="correcto{{x.Id}}">Correcto</label>
+                    </div>
+                    <div class="col s2">
+                        <br>
+                        <button type="submit" class="btn-floating green">
+                            <i class="material-icons">done</i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="fixed-action-btn horizontal click-to-toggle" style="bottom: 45px; right: 24px;">
+        <a class="btn-floating btn-large blue">
+            <i class="material-icons">menu</i>
+        </a>
+        <ul>
+            <li>
+                <a confirmed-click="volverAExamenes()"
+                   ng-confirm-click="Si ha realizado cambios los perdera, Cotinuar!"
+                   class="btn-floating red">
+                    <i class="material-icons">undo</i>
+                </a>
+            </li>
+            <li><a ng-click="confirmar()" class="btn-floating green darken-1"><i class="material-icons">save</i></a></li>
+        </ul>
+    </div>
+
+</div>
